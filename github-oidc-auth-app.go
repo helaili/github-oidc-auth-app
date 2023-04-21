@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"math/big"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -141,12 +142,13 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 }
 
 func main() {
-	fmt.Println("starting up")
+	port := os.Getenv("PORT")
+	fmt.Println(fmt.Sprintf("starting up on port %s", port))
 
 	gatewayContext := &GatewayContext{jwksLastUpdate: time.Now()}
 
 	server := http.Server{
-		Addr:         ":8000",
+		Addr:         fmt.Sprintf(":%s", port),
 		Handler:      gatewayContext,
 		ReadTimeout:  60 * time.Second,
 		WriteTimeout: 60 * time.Second,

@@ -1,0 +1,6 @@
+github-oidc-auth-app
+.env*
+.DS_Store
+bin
+*.pem
+.vscode

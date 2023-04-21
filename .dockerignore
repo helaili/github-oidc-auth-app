@@ -1,0 +1,7 @@
+.env.*
+.devcontainer
+.github
+github-oidc-auth-app
+*.pem
+test
+*.bicep
