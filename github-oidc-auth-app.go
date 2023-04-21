@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 )
 
 type JWK struct {
@@ -107,7 +107,16 @@ func validateTokenCameFromGitHub(oidcTokenString string, gc *GatewayContext) (jw
 }
 
 func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodConnect && req.RequestURI != "/apiExample" {
+	// Ping method to check we are up
+	if req.Method == http.MethodGet && req.RequestURI == "/ping" {
+		defer req.Body.Close()
+
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte("Ok\n"))
+		return
+	}
+
+	if req.Method != http.MethodConnect && req.RequestURI != "/token" {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
