@@ -1,5 +1,6 @@
 github-oidc-auth-app
 .env*
+!.env.sample
 .DS_Store
 bin
 *.pem

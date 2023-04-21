@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/joho/godotenv"
 )
 
 type JWK struct {
@@ -142,6 +143,7 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 }
 
 func main() {
+	godotenv.Load()
 	port := os.Getenv("PORT")
 	fmt.Println(fmt.Sprintf("starting up on port %s", port))
 
