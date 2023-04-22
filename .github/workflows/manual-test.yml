@@ -16,6 +16,8 @@ jobs:
 
       - name: Retrieving the token 
         run: |
-          curl -v -p --proxy-header "Gateway-Authorization: ${{ env.OIDC_TOKEN }}" -x https://your-load-balancer.example.com https://www.google.com
+          curl --header "Content-Type: application/json" \
+               --request POST \
+               --data '{"token":"${{ env.OIDC_TOKEN }}","installation":36706991}' https://github-oidc-auth-app.ngrok.dev/token
 
      

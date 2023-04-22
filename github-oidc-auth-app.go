@@ -1,17 +1,22 @@
 package main
 
 import (
+	"context"
 	"crypto/rsa"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/big"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
+	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/go-github/v52/github"
 	"github.com/joho/godotenv"
 )
 
@@ -33,6 +38,12 @@ type JWKS struct {
 type GatewayContext struct {
 	jwksCache      []byte
 	jwksLastUpdate time.Time
+	client         *github.Client
+}
+
+type ScopedTokenRequest struct {
+	Token          string `json:"token"`
+	InstallationId int64  `json:"installationId"`
 }
 
 func getKeyFromJwks(jwksBytes []byte) func(*jwt.Token) (interface{}, error) {
@@ -108,6 +119,19 @@ func validateTokenCameFromGitHub(oidcTokenString string, gc *GatewayContext) (jw
 	return claims, nil
 }
 
+func generateScopedToken(client *github.Client, installationId int64) {
+	repoName := [1]string{"website"}
+	opts := &github.InstallationTokenOptions{Repositories: repoName[:]}
+	// opts := &github.InstallationTokenOptions{}
+
+	token, _, err := client.Apps.CreateInstallationToken(context.Background(), installationId, opts)
+	if err != nil {
+		log.Fatal("failed to get scoped token:", err)
+		return
+	}
+	fmt.Printf("%s\n", token.GetToken())
+}
+
 func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// Ping method to check we are up
 	if req.Method == http.MethodGet && req.RequestURI == "/ping" {
@@ -118,20 +142,32 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 		return
 	}
 
-	if req.Method != http.MethodConnect && req.RequestURI != "/token" {
+	if req.Method != http.MethodPost && req.RequestURI != "/token" {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
 
-	// Check that the OIDC token verifies as a valid token from GitHub
-	//
-	// This only means the OIDC token came from any GitHub Actions workflow,
-	// we *must* check claims specific to our use case below
-	oidcTokenString := string(req.Header.Get("Gateway-Authorization"))
+	defer req.Body.Close()
 
-	claims, err := validateTokenCameFromGitHub(oidcTokenString, gatewayContext)
+	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		fmt.Println(err)
+		log.Println("Error retrieving request body.", err)
+		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
+		return
+	}
+
+	var scopedTokenRequest ScopedTokenRequest
+	err = json.Unmarshal([]byte(body), &scopedTokenRequest)
+	if err != nil {
+		log.Println("Error unmarshaling data from request.", err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	// Check that the OIDC token verifies as a valid token from GitHub
+	claims, err := validateTokenCameFromGitHub(scopedTokenRequest.Token, gatewayContext)
+	if err != nil {
+		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
@@ -139,15 +175,30 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 	fmt.Println(claims)
 
 	// Token is valid. We now need to generate a new token that is specific to our use case
+	generateScopedToken(gatewayContext.client, scopedTokenRequest.InstallationId)
 
 }
 
 func main() {
 	godotenv.Load()
 	port := os.Getenv("PORT")
-	fmt.Println(fmt.Sprintf("starting up on port %s", port))
+	private_key := os.Getenv("PRIVATE_KEY")
+	app_id, err := strconv.ParseInt(os.Getenv("APP_ID"), 10, 36)
+	if err != nil {
+		log.Fatal("Wrong format for APP_ID")
+	}
 
-	gatewayContext := &GatewayContext{jwksLastUpdate: time.Now()}
+	fmt.Printf("starting up on port %s\n", port)
+
+	appTransport, err := ghinstallation.NewAppsTransport(http.DefaultTransport, app_id, []byte(private_key))
+	if err != nil {
+		log.Fatal("Failed to initialize GitHub App transport:", err)
+	}
+
+	// Use installation transport with github.com/google/go-github
+	client := github.NewClient(&http.Client{Transport: appTransport})
+
+	gatewayContext := &GatewayContext{jwksLastUpdate: time.Now(), client: client}
 
 	server := http.Server{
 		Addr:         fmt.Sprintf(":%s", port),
