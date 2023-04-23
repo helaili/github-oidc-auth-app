@@ -11,32 +11,10 @@ jobs:
     steps:
       - name: Get OIDC token and set OIDC_TOKEN environment variable
         run: |
-          echo "OIDC=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" -H "Accept: application/json; api-version=2.0" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://ActionsOIDCGateway")"  >> $GITHUB_ENV
-          echo "$OIDC"
           echo "OIDC_TOKEN=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" -H "Accept: application/json; api-version=2.0" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://ActionsOIDCGateway" | jq -r ".value")"  >> $GITHUB_ENV
-          echo "::add-mask::$OIDC_TOKEN"
       - name: Retrieving the token 
         run: |
           echo "GITHUB_TOKEN=$(curl --header "Content-Type: application/json" --request POST  --data '{"oidcToken":"${{ env.OIDC_TOKEN }}","installationId":36706991}' https://github-oidc-auth-app.ngrok.dev/token)" >> $GITHUB_ENV
+      - name: Showing the token 
+        run: |
           echo "$GITHUB_TOKEN"
-  
-     
-  js:
-    environment: Production
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    steps:
-    - name: Install OIDC Client from Core Package
-      run: npm install @actions/core@1.6.0 @actions/http-client
-    - name: Get Id Token
-      uses: actions/github-script@v6
-      id: idtoken
-      with:
-        script: |
-          const coredemo = require('@actions/core')
-          let id_token = await coredemo.getIDToken()
-          console.log(`xxxxx ${id_token} xxxxx`)
-          coredemo.setOutput('id_token', id_token)
-
-     

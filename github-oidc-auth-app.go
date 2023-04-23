@@ -180,7 +180,7 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 		return
 	}
 
-	fmt.Println(claims)
+	log.Println(claims)
 
 	// Token is valid. We now need to generate a new token that is specific to our use case
 	scopedTokenResponse, err := generateScopedToken(gatewayContext.client, scopedTokenRequest.InstallationId)
@@ -189,6 +189,8 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+
+	log.Println(scopedTokenResponse)
 
 	// Return the new token to the client
 	w.Header().Set("Content-Type", "application/json")
