@@ -42,7 +42,12 @@ type GatewayContext struct {
 }
 
 type ScopedTokenRequest struct {
-	Token          string `json:"token"`
+	OIDCToken      string `json:"oidcToken"`
+	InstallationId int64  `json:"installationId"`
+}
+
+type ScopedTokenResponse struct {
+	GitHubToken    string `json:"githubToken"`
 	InstallationId int64  `json:"installationId"`
 }
 
@@ -119,17 +124,18 @@ func validateTokenCameFromGitHub(oidcTokenString string, gc *GatewayContext) (jw
 	return claims, nil
 }
 
-func generateScopedToken(client *github.Client, installationId int64) {
+func generateScopedToken(client *github.Client, installationId int64) (ScopedTokenResponse, error) {
 	repoName := [1]string{"website"}
 	opts := &github.InstallationTokenOptions{Repositories: repoName[:]}
 	// opts := &github.InstallationTokenOptions{}
 
 	token, _, err := client.Apps.CreateInstallationToken(context.Background(), installationId, opts)
 	if err != nil {
-		log.Fatal("failed to get scoped token:", err)
-		return
+		log.Println("failed to get scoped token:", err)
+		return ScopedTokenResponse{}, err
 	}
-	fmt.Printf("%s\n", token.GetToken())
+
+	return ScopedTokenResponse{InstallationId: installationId, GitHubToken: token.GetToken()}, nil
 }
 
 func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -165,7 +171,7 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 	}
 
 	// Check that the OIDC token verifies as a valid token from GitHub
-	claims, err := validateTokenCameFromGitHub(scopedTokenRequest.Token, gatewayContext)
+	claims, err := validateTokenCameFromGitHub(scopedTokenRequest.OIDCToken, gatewayContext)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
@@ -175,8 +181,17 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 	fmt.Println(claims)
 
 	// Token is valid. We now need to generate a new token that is specific to our use case
-	generateScopedToken(gatewayContext.client, scopedTokenRequest.InstallationId)
+	scopedTokenResponse, err := generateScopedToken(gatewayContext.client, scopedTokenRequest.InstallationId)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 
+	// Return the new token to the client
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(scopedTokenResponse)
 }
 
 func main() {
