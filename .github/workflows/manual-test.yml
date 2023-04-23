@@ -16,9 +16,9 @@ jobs:
           echo "OIDC_TOKEN=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" -H "Accept: application/json; api-version=2.0" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://ActionsOIDCGateway" | jq -r ".value")"  >> $GITHUB_ENV
           echo "::add-mask::$OIDC_TOKEN"
       - name: Retrieving the token 
-          run: |
-            echo "GITHUB_TOKEN=$(curl --header "Content-Type: application/json" --request POST  --data '{"oidcToken":"${{ env.OIDC_TOKEN }}","installationId":36706991}' https://github-oidc-auth-app.ngrok.dev/token)" >> $GITHUB_ENV
-            echo "$GITHUB_TOKEN"
+        run: |
+          echo "GITHUB_TOKEN=$(curl --header "Content-Type: application/json" --request POST  --data '{"oidcToken":"${{ env.OIDC_TOKEN }}","installationId":36706991}' https://github-oidc-auth-app.ngrok.dev/token)" >> $GITHUB_ENV
+          echo "$GITHUB_TOKEN"
   
      
   js:
