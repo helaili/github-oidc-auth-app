@@ -170,6 +170,8 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 		return
 	}
 
+	log.Println(scopedTokenRequest.OIDCToken)
+
 	// Check that the OIDC token verifies as a valid token from GitHub
 	claims, err := validateTokenCameFromGitHub(scopedTokenRequest.OIDCToken, gatewayContext)
 	if err != nil {
