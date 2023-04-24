@@ -40,12 +40,12 @@ type Scope struct {
 }
 
 type Entitlement struct {
-	Owner       string  `yaml:"owner,omitempty"`
-	Repository  string  `yaml:"repository,omitempty"`
-	Workflow    string  `yaml:"workflow,omitempty"`
-	EventName   string  `yaml:"event_name,omitempty"`
-	Environment string  `yaml:"environment,omitempty"`
-	Scopes      []Scope `yaml:"scopes"`
+	Owner       string `yaml:"owner,omitempty"`
+	Repository  string `yaml:"repository,omitempty"`
+	Workflow    string `yaml:"workflow,omitempty"`
+	EventName   string `yaml:"event_name,omitempty"`
+	Environment string `yaml:"environment,omitempty"`
+	Scopes      Scope  `yaml:"scopes"`
 }
 
 func getInstallationLogin(appTransport *ghinstallation.AppsTransport, installationId int64) (string, error) {
@@ -167,7 +167,6 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 	// Retrieve the entitlement config for the installation
 	entitlementConfig, err := getEntitlementConfig(scopedTokenRequest.InstallationId, gatewayContext.appTransport)
 	if err != nil {
-		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
