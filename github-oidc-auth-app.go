@@ -70,10 +70,10 @@ func getEntitlementConfig(installationId int64, appTransport *ghinstallation.App
 	// Use installation transport with github.com/google/go-github
 	client := github.NewClient(&http.Client{Transport: itr})
 
-	// Retrieve the oidc_entitlements.yml file from the .github_private repository in the organization that owns the installation
-	fileContent, _, _, err := client.Repositories.GetContents(context.Background(), login, ".github_private", "oidc_entitlements.yml", &github.RepositoryContentGetOptions{})
+	// Retrieve the oidc_entitlements.yml file from the .github-private repository in the organization that owns the installation
+	fileContent, _, _, err := client.Repositories.GetContents(context.Background(), login, ".github-private", "oidc_entitlements.yml", &github.RepositoryContentGetOptions{})
 	if err != nil {
-		log.Println("failed to get file oidc_entitlements.yml in repository .github_private:", err)
+		log.Println("failed to get file oidc_entitlements.yml in repository .github-private:", err)
 		return nil, err
 	}
 
