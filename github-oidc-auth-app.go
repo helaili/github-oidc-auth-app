@@ -2,13 +2,10 @@ package main
 
 import (
 	"context"
-	"crypto/rsa"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math/big"
 	"net/http"
 	"os"
 	"strconv"
@@ -18,27 +15,13 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/google/go-github/v52/github"
 	"github.com/joho/godotenv"
+	"gopkg.in/yaml.v2"
 )
-
-type JWK struct {
-	N   string
-	Kty string
-	Kid string
-	Alg string
-	E   string
-	Use string
-	X5c []string
-	X5t string
-}
-
-type JWKS struct {
-	Keys []JWK
-}
 
 type GatewayContext struct {
 	jwksCache      []byte
 	jwksLastUpdate time.Time
-	client         *github.Client
+	appTransport   *ghinstallation.AppsTransport
 }
 
 type ScopedTokenRequest struct {
@@ -51,84 +34,84 @@ type ScopedTokenResponse struct {
 	InstallationId int64  `json:"installationId"`
 }
 
-func getKeyFromJwks(jwksBytes []byte) func(*jwt.Token) (interface{}, error) {
-	return func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
+type Scope struct {
+	Repositories []string          `yaml:"repositories,omitempty"`
+	Permissions  map[string]string `yaml:"permissions,omitempty"`
+}
 
-		var jwks JWKS
-		if err := json.Unmarshal(jwksBytes, &jwks); err != nil {
-			return nil, fmt.Errorf("unable to parse JWKS")
-		}
+type Entitlement struct {
+	Owner       string  `yaml:"owner,omitempty"`
+	Repository  string  `yaml:"repository,omitempty"`
+	Workflow    string  `yaml:"workflow,omitempty"`
+	EventName   string  `yaml:"event_name,omitempty"`
+	Environment string  `yaml:"environment,omitempty"`
+	Scopes      []Scope `yaml:"scopes"`
+}
 
-		for _, jwk := range jwks.Keys {
-			if jwk.Kid == token.Header["kid"] {
-				nBytes, err := base64.RawURLEncoding.DecodeString(jwk.N)
-				if err != nil {
-					return nil, fmt.Errorf("unable to parse key")
-				}
-				var n big.Int
+func getInstallationLogin(appTransport *ghinstallation.AppsTransport, installationId int64) (string, error) {
+	client := github.NewClient(&http.Client{Transport: appTransport})
 
-				eBytes, err := base64.RawURLEncoding.DecodeString(jwk.E)
-				if err != nil {
-					return nil, fmt.Errorf("unable to parse key")
-				}
-				var e big.Int
+	// Retrieve installation
+	installation, _, err := client.Apps.GetInstallation(context.Background(), installationId)
+	if err != nil {
+		log.Println("failed to get installation:", err)
+		return "", err
+	}
+	return installation.Account.GetLogin(), nil
+}
 
-				key := rsa.PublicKey{
-					N: n.SetBytes(nBytes),
-					E: int(e.SetBytes(eBytes).Uint64()),
-				}
+func getEntitlementConfig(installationId int64, appTransport *ghinstallation.AppsTransport) ([]Entitlement, error) {
+	login, err := getInstallationLogin(appTransport, installationId)
+	if err != nil {
+		return nil, err
+	}
 
-				return &key, nil
+	itr := ghinstallation.NewFromAppsTransport(appTransport, installationId)
+	// Use installation transport with github.com/google/go-github
+	client := github.NewClient(&http.Client{Transport: itr})
+
+	// Retrieve the oidc_entitlements.yml file from the .github_private repository in the organization that owns the installation
+	fileContent, _, _, err := client.Repositories.GetContents(context.Background(), login, ".github_private", "oidc_entitlements.yml", &github.RepositoryContentGetOptions{})
+	if err != nil {
+		log.Println("failed to get file oidc_entitlements.yml in repository .github_private:", err)
+		return nil, err
+	}
+
+	// Get the content of the oidc_entitlements.yml file as a string
+	content, err := fileContent.GetContent()
+	if err != nil {
+		log.Println("failed to get content of file oidc_entitlements.yml in repository .github_private:", err)
+		return nil, err
+	}
+
+	// Parse the oidc_entitlements.yml file as YAML
+	var entitlements []Entitlement
+	err = yaml.Unmarshal([]byte(content), &entitlements)
+	if err != nil {
+		log.Println("failed to unmarshal content of file oidc_entitlements.yml in repository .github_private:", err)
+		return nil, err
+	}
+	return entitlements, nil
+}
+
+func computeEntitlements(claims jwt.MapClaims, entitlementConfig []Entitlement) ([]Entitlement, error) {
+	var entitlements []Entitlement
+	/*
+		for _, entitlement := range entitlementConfig {
+			if entitlement.Owner == claims[0].Owner && entitlement.Repository == claims[0].Repository && entitlement.Workflow == claims[0].Workflow && entitlement.EventName == claims[0].EventName && entitlement.Environment == claims[0].Environment {
+				entitlements = append(entitlements, entitlement)
 			}
 		}
-
-		return nil, fmt.Errorf("unknown kid: %v", token.Header["kid"])
-	}
+	*/
+	return entitlements, nil
 }
 
-func validateTokenCameFromGitHub(oidcTokenString string, gc *GatewayContext) (jwt.MapClaims, error) {
-	// Check if we have a recently cached JWKS
-	now := time.Now()
-
-	if now.Sub(gc.jwksLastUpdate) > time.Minute || len(gc.jwksCache) == 0 {
-		resp, err := http.Get("https://token.actions.githubusercontent.com/.well-known/jwks")
-		if err != nil {
-			fmt.Println(err)
-			return nil, fmt.Errorf("unable to get JWKS configuration")
-		}
-
-		jwksBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println(err)
-			return nil, fmt.Errorf("unable to get JWKS configuration")
-		}
-
-		gc.jwksCache = jwksBytes
-		gc.jwksLastUpdate = now
-	}
-
-	// Attempt to validate JWT with JWKS
-	oidcToken, err := jwt.Parse(string(oidcTokenString), getKeyFromJwks(gc.jwksCache))
-	if err != nil || !oidcToken.Valid {
-		return nil, fmt.Errorf("unable to validate JWT")
-	}
-
-	claims, ok := oidcToken.Claims.(jwt.MapClaims)
-	if !ok {
-		return nil, fmt.Errorf("unable to map JWT claims")
-	}
-
-	return claims, nil
-}
-
-func generateScopedToken(client *github.Client, installationId int64) (ScopedTokenResponse, error) {
+func generateScopedToken(entitlements []Entitlement, installationId int64, appTransport *ghinstallation.AppsTransport) (ScopedTokenResponse, error) {
 	repoName := [1]string{"website"}
 	opts := &github.InstallationTokenOptions{Repositories: repoName[:]}
 	// opts := &github.InstallationTokenOptions{}
 
+	client := github.NewClient(&http.Client{Transport: appTransport})
 	token, _, err := client.Apps.CreateInstallationToken(context.Background(), installationId, opts)
 	if err != nil {
 		log.Println("failed to get scoped token:", err)
@@ -180,10 +163,24 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 		return
 	}
 
-	log.Println(claims)
-
 	// Token is valid. We now need to generate a new token that is specific to our use case
-	scopedTokenResponse, err := generateScopedToken(gatewayContext.client, scopedTokenRequest.InstallationId)
+	// Retrieve the entitlement config for the installation
+	entitlementConfig, err := getEntitlementConfig(scopedTokenRequest.InstallationId, gatewayContext.appTransport)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	// Compute the entitlement for the claim
+	entitlements, err := computeEntitlements(claims, entitlementConfig)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	scopedTokenResponse, err := generateScopedToken(entitlements, scopedTokenRequest.InstallationId, gatewayContext.appTransport)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -214,10 +211,7 @@ func main() {
 		log.Fatal("Failed to initialize GitHub App transport:", err)
 	}
 
-	// Use installation transport with github.com/google/go-github
-	client := github.NewClient(&http.Client{Transport: appTransport})
-
-	gatewayContext := &GatewayContext{jwksLastUpdate: time.Now(), client: client}
+	gatewayContext := &GatewayContext{jwksLastUpdate: time.Now(), appTransport: appTransport}
 
 	server := http.Server{
 		Addr:         fmt.Sprintf(":%s", port),

@@ -5,3 +5,4 @@ github-oidc-auth-app
 bin
 *.pem
 .vscode
+claims.txt

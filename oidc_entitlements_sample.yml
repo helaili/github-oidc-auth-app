@@ -1,0 +1,10 @@
+ - owner: helaili
+   repo: github-oidc-auth-app
+   workflow: Manual Test Workflow
+   event_name: workflow_dispatch 
+   environment: prodcution 
+   scopes:
+    repositories: 
+      - website
+    permissions: 
+      contents: read
