@@ -80,7 +80,7 @@ func getEntitlementConfig(installationId int64, appTransport *ghinstallation.App
 	// Get the content of the oidc_entitlements.yml file as a string
 	content, err := fileContent.GetContent()
 	if err != nil {
-		log.Println("failed to get content of file oidc_entitlements.yml in repository .github_private:", err)
+		log.Println("failed to get content of file oidc_entitlements.yml in repository .github-private:", err)
 		return nil, err
 	}
 
@@ -88,7 +88,7 @@ func getEntitlementConfig(installationId int64, appTransport *ghinstallation.App
 	var entitlements []Entitlement
 	err = yaml.Unmarshal([]byte(content), &entitlements)
 	if err != nil {
-		log.Println("failed to unmarshal content of file oidc_entitlements.yml in repository .github_private:", err)
+		log.Println("failed to unmarshal content of file oidc_entitlements.yml in repository .github-private:", err)
 		return nil, err
 	}
 	return entitlements, nil
