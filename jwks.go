@@ -100,3 +100,22 @@ func validateTokenCameFromGitHub(oidcTokenString string, gc *GatewayContext) (jw
 
 	return claims, nil
 }
+
+func stringifyMapClaims(claims jwt.MapClaims) string {
+	return "actor:" + claimFieldValue(claims["actor"]) +
+		",environment:" + claimFieldValue(claims["environment"]) +
+		",event_name:" + claimFieldValue(claims["event_name"]) +
+		",ref:" + claimFieldValue(claims["ref"]) +
+		",repository:" + claimFieldValue(claims["repository"]) +
+		",repository_owner:" + claimFieldValue(claims["repository_owner"]) +
+		",repository_visibility:" + claimFieldValue(claims["repository_visibility"]) +
+		",workflow:" + claimFieldValue(claims["workflow"])
+}
+
+func claimFieldValue(value interface{}) string {
+	if value == nil {
+		return "XXXNOTSETXXX"
+	} else {
+		return fmt.Sprint(value)
+	}
+}

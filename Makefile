@@ -13,7 +13,7 @@ clean:
 	rm -f github-oidc-auth-app
 
 test:
-	go test
+	go test -v
 
 docker-build:
 	make build && docker build -t github-oidc-auth-app .

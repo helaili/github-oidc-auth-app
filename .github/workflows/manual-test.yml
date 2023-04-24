@@ -6,7 +6,7 @@ on:
 jobs:
   shell:
     runs-on: ubuntu-latest
-    environment: prodcution
+    environment: production
     permissions:
       id-token: write
     steps:

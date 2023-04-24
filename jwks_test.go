@@ -123,3 +123,38 @@ func TestValidateTokenCameFromGitHub(t *testing.T) {
 		t.Error("Should not validate unsigned token")
 	}
 }
+
+func TestStringifyCompleteMapClaims(t *testing.T) {
+	claims := jwt.MapClaims{
+		"actor":                 "helaili",
+		"environment":           "production",
+		"event_name":            "workflow_dispatch",
+		"ref":                   "refs/heads/main",
+		"repository":            "helaili/github-oidc-auth-app",
+		"repository_owner":      "helaili",
+		"repository_visibility": "public",
+		"workflow":              "Manual Test Workflow",
+	}
+
+	strMapClaims := stringifyMapClaims(claims)
+	if strMapClaims != "actor:helaili,environment:production,event_name:workflow_dispatch,ref:refs/heads/main,repository:helaili/github-oidc-auth-app,repository_owner:helaili,repository_visibility:public,workflow:Manual Test Workflow" {
+		t.Error("Expected stringified map claims to be actor:helaili,environment:production,event_name:workflow_dispatch,ref:refs/heads/main,repository:helaili/github-oidc-auth-app,repository_owner:helaili,repository_visibility:public,workflow:Manual Test Workflow, but got", strMapClaims)
+	}
+}
+
+func TestStringifyPartialMapClaims(t *testing.T) {
+	claims := jwt.MapClaims{
+		"actor":                 "helaili",
+		"event_name":            "workflow_dispatch",
+		"ref":                   "refs/heads/main",
+		"repository":            "helaili/github-oidc-auth-app",
+		"repository_owner":      "helaili",
+		"repository_visibility": "public",
+		"workflow":              "Manual Test Workflow",
+	}
+
+	strMapClaims := stringifyMapClaims(claims)
+	if strMapClaims != "actor:helaili,environment:XXXNOTSETXXX,event_name:workflow_dispatch,ref:refs/heads/main,repository:helaili/github-oidc-auth-app,repository_owner:helaili,repository_visibility:public,workflow:Manual Test Workflow" {
+		t.Error("Expected stringified map claims to be actor:helaili,environment:XXXNOTSETXXX,event_name:workflow_dispatch,ref:refs/heads/main,repository:helaili/github-oidc-auth-app,repository_owner:helaili,repository_visibility:public,workflow:Manual Test Workflow, but got", strMapClaims)
+	}
+}

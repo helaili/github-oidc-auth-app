@@ -1,0 +1,13 @@
+ - actor: helaili
+   environment: production
+   event_name: workflow_dispatch
+   ref: refs/heads/main
+   repository: helaili/github-oidc-auth-app
+   repository_owner: helaili
+   repository_visibility": public
+   workflow: Manual Test Workflow
+   scopes:
+    repositories: 
+      - codespace-oddity
+    permissions: 
+      contents: read

@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -32,20 +33,6 @@ type ScopedTokenRequest struct {
 type ScopedTokenResponse struct {
 	GitHubToken    string `json:"githubToken"`
 	InstallationId int64  `json:"installationId"`
-}
-
-type Scope struct {
-	Repositories []string          `yaml:"repositories,omitempty"`
-	Permissions  map[string]string `yaml:"permissions,omitempty"`
-}
-
-type Entitlement struct {
-	Owner       string `yaml:"owner,omitempty"`
-	Repository  string `yaml:"repository,omitempty"`
-	Workflow    string `yaml:"workflow,omitempty"`
-	EventName   string `yaml:"event_name,omitempty"`
-	Environment string `yaml:"environment,omitempty"`
-	Scopes      Scope  `yaml:"scopes"`
 }
 
 func getInstallationLogin(appTransport *ghinstallation.AppsTransport, installationId int64) (string, error) {
@@ -94,20 +81,23 @@ func getEntitlementConfig(installationId int64, appTransport *ghinstallation.App
 	return entitlements, nil
 }
 
-func computeEntitlements(claims jwt.MapClaims, entitlementConfig []Entitlement) ([]Entitlement, error) {
-	var entitlements []Entitlement
-	/*
-		for _, entitlement := range entitlementConfig {
-			if entitlement.Owner == claims[0].Owner && entitlement.Repository == claims[0].Repository && entitlement.Workflow == claims[0].Workflow && entitlement.EventName == claims[0].EventName && entitlement.Environment == claims[0].Environment {
-				entitlements = append(entitlements, entitlement)
-			}
+func computeScopes(claims jwt.MapClaims, entitlementConfig []Entitlement) *Scope {
+	scope := NewScope()
+
+	strMapClaims := stringifyMapClaims(claims)
+
+	for _, entitlement := range entitlementConfig {
+		match, _ := regexp.MatchString(entitlement.regexString(), strMapClaims)
+		if match {
+			scope.merge(entitlement.Scopes)
 		}
-	*/
-	return entitlements, nil
+	}
+
+	return scope
 }
 
-func generateScopedToken(entitlements []Entitlement, installationId int64, appTransport *ghinstallation.AppsTransport) (ScopedTokenResponse, error) {
-	repoName := [1]string{"website"}
+func generateScopedToken(scope *Scope, installationId int64, appTransport *ghinstallation.AppsTransport) (ScopedTokenResponse, error) {
+	repoName := [1]string{"codespace-oddity"}
 	opts := &github.InstallationTokenOptions{Repositories: repoName[:]}
 	// opts := &github.InstallationTokenOptions{}
 
@@ -172,14 +162,9 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 	}
 
 	// Compute the entitlement for the claim
-	entitlements, err := computeEntitlements(claims, entitlementConfig)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
+	scope := computeScopes(claims, entitlementConfig)
 
-	scopedTokenResponse, err := generateScopedToken(entitlements, scopedTokenRequest.InstallationId, gatewayContext.appTransport)
+	scopedTokenResponse, err := generateScopedToken(scope, scopedTokenRequest.InstallationId, gatewayContext.appTransport)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
