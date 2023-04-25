@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -200,7 +201,12 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 func main() {
 	godotenv.Load()
 	port := os.Getenv("PORT")
-	private_key := os.Getenv("PRIVATE_KEY")
+	private_key_base64 := os.Getenv("PRIVATE_KEY")
+
+	private_key, err := base64.StdEncoding.DecodeString(private_key_base64)
+	if err != nil {
+		log.Fatal("error decoding private key", err)
+	}
 	app_id, err := strconv.ParseInt(os.Getenv("APP_ID"), 10, 36)
 	if err != nil {
 		log.Fatal("Wrong format for APP_ID")
@@ -213,12 +219,9 @@ func main() {
 		configFile = "oidc_entitlements.yml"
 	}
 
-	log.Println(private_key)
-
-	appTransport, err := ghinstallation.NewAppsTransport(http.DefaultTransport, app_id, []byte(private_key))
+	appTransport, err := ghinstallation.NewAppsTransport(http.DefaultTransport, app_id, private_key)
 	if err != nil {
-		log.Println("Failed to initialize GitHub App transport:", err)
-		//log.Fatal("Failed to initialize GitHub App transport:", err)
+		log.Fatal("Failed to initialize GitHub App transport:", err)
 	}
 
 	fmt.Printf("starting up on port %s\n", port)
