@@ -97,8 +97,7 @@ func computeScopes(claims jwt.MapClaims, entitlementConfig []Entitlement) *Scope
 }
 
 func generateScopedToken(scope *Scope, installationId int64, appTransport *ghinstallation.AppsTransport) (ScopedTokenResponse, error) {
-	repoName := [1]string{"codespace-oddity"}
-	opts := &github.InstallationTokenOptions{Repositories: repoName[:]}
+	opts := &github.InstallationTokenOptions{Repositories: scope.Repositories, Permissions: &scope.Permissions}
 	// opts := &github.InstallationTokenOptions{}
 
 	client := github.NewClient(&http.Client{Transport: appTransport})

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/google/go-github/v52/github"
 	"gopkg.in/yaml.v2"
 )
 
@@ -65,17 +67,21 @@ func TestComputeSimpleEntitlements(t *testing.T) {
 		"workflow":              "Manual Test Workflow",
 	}
 
+	fmt.Printf("entitlement=%s\n", *entitlementConfig[0].Scopes.Permissions.Contents)
+
 	// Compute the scope for the claims
 	scope := computeScopes(claims, entitlementConfig)
 	expectedRepoList := []string{"codespace-oddity"}
-	expectedPermissions := map[string]string{
-		"contents": "read",
+	read := "read"
+	expectedPermissions := github.InstallationPermissions{
+		Contents: &read,
 	}
+
 	if !reflect.DeepEqual(scope.Repositories, expectedRepoList) {
 		t.Error("Expected scope.Repositories to be [codespace-oddity], but got", scope.Repositories)
 	}
 	if !reflect.DeepEqual(scope.Permissions, expectedPermissions) {
-		t.Error("Expected scope.Repositories to be {\"contents\": \"read\"}, but got", scope.Permissions)
+		t.Error("Expected scope.Permissions to be", expectedPermissions, ", but got", scope.Permissions)
 	}
 }
 
@@ -105,9 +111,11 @@ func TestComputeMultipleEntitlements(t *testing.T) {
 	}
 
 	expectedRepoList := []string{"codespace-oddity", "bootstrap"}
-	expectedPermissions := map[string]string{
-		"contents": "write",
-		"checks":   "read",
+	read := "read"
+	write := "write"
+	expectedPermissions := github.InstallationPermissions{
+		Contents: &write,
+		Checks:   &read,
 	}
 
 	// Compute the scope for the claims
@@ -116,6 +124,6 @@ func TestComputeMultipleEntitlements(t *testing.T) {
 		t.Error("Expected scope.Repositories to be [codespace-oddity, bootstrap], but got", scope.Repositories)
 	}
 	if !reflect.DeepEqual(scope.Permissions, expectedPermissions) {
-		t.Error("Expected scope.Repositories to be {\"contents\": \"write\", \"checks\": \"read\"}, but got", scope.Permissions)
+		t.Error("Expected scope.Permissions to be", expectedPermissions, ", but got", scope.Permissions)
 	}
 }
