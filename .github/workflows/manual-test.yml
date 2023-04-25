@@ -36,10 +36,32 @@ jobs:
               console.log(response.data)
             })
 
-  should-fail:
+  no-configured-entitlement:
     # There is no matching entitlement config in our test data so this should fail to retrieve a token
     runs-on: ubuntu-latest
     environment: test
+    permissions:
+      id-token: write
+    steps:
+      - name: Get OIDC token and set OIDC_TOKEN environment variable
+        run: |
+          echo "OIDC_TOKEN=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" -H "Accept: application/json; api-version=2.0" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://ActionsOIDCGateway" | jq -r ".value")"  >> $GITHUB_ENV
+      - name: Retrieving the token 
+        run: |
+          echo "SCOPED_TOKEN=$(curl --header "Content-Type: application/json" --request POST  --data '{"oidcToken":"${{ env.OIDC_TOKEN }}","installationId":36789227}' https://github-oidc-auth-app.ngrok.dev/token | jq -r ".githubToken")" >> $GITHUB_ENV
+      - name: Check the token 
+        run: |
+          if [ -n "$SCOPED_TOKEN" ]; then
+            echo "::error title=Failure::Token should have been empty, something went wrong"
+            exit 0
+          else
+            echo "Sweet succsess!"
+          fi
+  
+  config-exceed-entitlement:
+    # The config provides more scopes than what the app is configured to provide
+    runs-on: ubuntu-latest
+    environment: hell
     permissions:
       id-token: write
     steps:
