@@ -26,4 +26,6 @@ jobs:
             github.rest.repos.get({
               owner: 'octodemo',
               repo: 'codespace-oddity'
+            }).then((response) => {
+              console.log(response.data)
             })
