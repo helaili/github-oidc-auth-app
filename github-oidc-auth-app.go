@@ -213,9 +213,10 @@ func main() {
 		configFile = "oidc_entitlements.yml"
 	}
 
+	log.Println(private_key)
+
 	appTransport, err := ghinstallation.NewAppsTransport(http.DefaultTransport, app_id, []byte(private_key))
 	if err != nil {
-		log.Println(private_key)
 		log.Fatal("Failed to initialize GitHub App transport:", err)
 	}
 
