@@ -21,7 +21,7 @@ jobs:
           if [ -n "$SCOPED_TOKEN" ]; then
             echo "Sweet succsess!"
           else
-            ::error title={Failed to get token}::Empty token, something went wrong
+            echo "::error title=Failed to get token::Empty token, something went wrong"
           fi
       - name: Use the token
         uses: actions/github-script@v6
@@ -51,7 +51,7 @@ jobs:
       - name: Check the token 
         run: |
           if [ -n "$SCOPED_TOKEN" ]; then
-            ::error title={Failure}::Token should have been empty, something went wrong
+            echo "::error title=Failure::Token should have been empty, something went wrong"
           else
             echo "Sweet succsess!"
           fi
