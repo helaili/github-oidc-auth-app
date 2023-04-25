@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -66,8 +65,6 @@ func TestComputeSimpleEntitlements(t *testing.T) {
 		"repository_visibility": "public",
 		"workflow":              "Manual Test Workflow",
 	}
-
-	fmt.Printf("entitlement=%s\n", *entitlementConfig[0].Scopes.Permissions.Contents)
 
 	// Compute the scope for the claims
 	scope := computeScopes(claims, entitlementConfig)

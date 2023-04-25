@@ -15,7 +15,15 @@ jobs:
           echo "OIDC_TOKEN=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" -H "Accept: application/json; api-version=2.0" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://ActionsOIDCGateway" | jq -r ".value")"  >> $GITHUB_ENV
       - name: Retrieving the token 
         run: |
-          echo "GITHUB_TOKEN=$(curl --header "Content-Type: application/json" --request POST  --data '{"oidcToken":"${{ env.OIDC_TOKEN }}","installationId":36789227}' https://github-oidc-auth-app.ngrok.dev/token)" >> $GITHUB_ENV
+          echo "SCOPED_TOKEN=$(curl --header "Content-Type: application/json" --request POST  --data '{"oidcToken":"${{ env.OIDC_TOKEN }}","installationId":36789227}' https://github-oidc-auth-app.ngrok.dev/token | jq -r ".githubToken")" >> $GITHUB_ENV
       - name: Showing the token 
         run: |
-          echo "$GITHUB_TOKEN"
+          echo "$SCOPED_TOKEN"
+      - uses: actions/github-script@v6
+        with:
+          github-token: ${{ env.SCOPED_TOKEN }}
+          script: |
+            github.rest.repos.get({
+              owner: 'octodemo',
+              repo: 'codespace-oddity'
+            })
