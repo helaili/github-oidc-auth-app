@@ -33,6 +33,7 @@ type ScopedTokenRequest struct {
 type ScopedTokenResponse struct {
 	GitHubToken    string `json:"githubToken"`
 	InstallationId int64  `json:"installationId"`
+	Message        string `json:"message"`
 }
 
 func getInstallationLogin(appTransport *ghinstallation.AppsTransport, installationId int64) (string, error) {
@@ -93,15 +94,14 @@ func computeScopes(claims jwt.MapClaims, entitlementConfig []Entitlement) *Scope
 		}
 	}
 
-	log.Printf("Computed scopes: %v\n", scope)
+	//log.Printf("Computed scopes: %v\n", scope)
 
 	return scope
 }
 
 func generateScopedToken(scope *Scope, installationId int64, appTransport *ghinstallation.AppsTransport) (ScopedTokenResponse, error) {
 	if scope == nil || scope.isEmpty() {
-		log.Println("no scopes matching these claims")
-		// return ScopedTokenResponse{}, fmt.Errorf("no scopes matching these claims")
+		return ScopedTokenResponse{InstallationId: installationId, Message: "no scope matching these claims"}, nil
 	}
 
 	opts := &github.InstallationTokenOptions{Repositories: scope.Repositories, Permissions: &scope.Permissions}
