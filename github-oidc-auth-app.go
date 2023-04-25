@@ -167,7 +167,11 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 		return
 	}
 
-	log.Printf("succesfully generated token for claims: %v, with scopes %s\n", claims, scope.String())
+	if scopedTokenResponse.GitHubToken != "" {
+		log.Printf("no token generated for claims: %v\n", claims)
+	} else {
+		log.Printf("succesfully generated token for claims: %v, with scopes %s\n", claims, scope.String())
+	}
 
 	// Return the new token to the client
 	w.Header().Set("Content-Type", "application/json")
