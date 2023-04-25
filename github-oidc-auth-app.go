@@ -93,12 +93,18 @@ func computeScopes(claims jwt.MapClaims, entitlementConfig []Entitlement) *Scope
 		}
 	}
 
+	log.Printf("Computed scopes: %v\n", scope)
+
 	return scope
 }
 
 func generateScopedToken(scope *Scope, installationId int64, appTransport *ghinstallation.AppsTransport) (ScopedTokenResponse, error) {
+	if scope == nil || scope.isEmpty() {
+		log.Println("no scopes matching these claims")
+		// return ScopedTokenResponse{}, fmt.Errorf("no scopes matching these claims")
+	}
+
 	opts := &github.InstallationTokenOptions{Repositories: scope.Repositories, Permissions: &scope.Permissions}
-	// opts := &github.InstallationTokenOptions{}
 
 	client := github.NewClient(&http.Client{Transport: appTransport})
 	token, _, err := client.Apps.CreateInstallationToken(context.Background(), installationId, opts)
@@ -142,8 +148,6 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 		return
 	}
 
-	log.Println(scopedTokenRequest.OIDCToken)
-
 	// Check that the OIDC token verifies as a valid token from GitHub
 	claims, err := validateTokenCameFromGitHub(scopedTokenRequest.OIDCToken, gatewayContext)
 	if err != nil {
@@ -165,7 +169,6 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 
 	scopedTokenResponse, err := generateScopedToken(scope, scopedTokenRequest.InstallationId, gatewayContext.appTransport)
 	if err != nil {
-		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}

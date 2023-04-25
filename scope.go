@@ -18,6 +18,30 @@ func NewScope() *Scope {
 	}
 }
 
+func (scope *Scope) isEmpty() bool {
+	noPermissionSet := true
+	// Get the list of fields from the struct github.InstallationPermissions
+	fields := reflect.VisibleFields(reflect.TypeOf(struct{ github.InstallationPermissions }{}))
+
+	reflectScope := reflect.ValueOf(&scope.Permissions).Elem()
+
+	for _, field := range fields {
+		value := reflectScope.FieldByName(field.Name)
+
+		// Has this filed been set?
+		if value.IsValid() && !value.IsZero() {
+			// Get the value of the field as a string
+			valueString := value.Elem().String()
+			if valueString != "none" {
+				// We have at least one permission set
+				noPermissionSet = false
+				break
+			}
+		}
+	}
+	return scope == nil || (len(scope.Repositories) == 0 && noPermissionSet)
+}
+
 func (cumulativeScope *Scope) merge(additionalScope Scope) {
 	cumulativeScope.Repositories = append(cumulativeScope.Repositories, additionalScope.Repositories...)
 
