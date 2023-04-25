@@ -217,7 +217,8 @@ func main() {
 
 	appTransport, err := ghinstallation.NewAppsTransport(http.DefaultTransport, app_id, []byte(private_key))
 	if err != nil {
-		log.Fatal("Failed to initialize GitHub App transport:", err)
+		log.Println("Failed to initialize GitHub App transport:", err)
+		//log.Fatal("Failed to initialize GitHub App transport:", err)
 	}
 
 	fmt.Printf("starting up on port %s\n", port)
