@@ -38,7 +38,11 @@ type ScopedTokenResponse struct {
 	Message        string `json:"message"`
 }
 
+/*
+ * Retrieves the login (aka organization name) of the installation with the given id
+ */
 func getInstallationLogin(appTransport *ghinstallation.AppsTransport, installationId int64) (string, error) {
+	// TODO: cache this
 	client := github.NewClient(&http.Client{Transport: appTransport})
 
 	// Retrieve installation
@@ -49,6 +53,10 @@ func getInstallationLogin(appTransport *ghinstallation.AppsTransport, installati
 	return installation.Account.GetLogin(), nil
 }
 
+/*
+ * Retrieve the entitlement config for the installation with the organisation that owns the installation.
+ * Default to the .github-private repository and oidc_entitlements.yml file
+ */
 func getEntitlementConfig(configRepo string, configFile string, installationId int64, appTransport *ghinstallation.AppsTransport) ([]Entitlement, error) {
 	login, err := getInstallationLogin(appTransport, installationId)
 	if err != nil {
@@ -80,6 +88,10 @@ func getEntitlementConfig(configRepo string, configFile string, installationId i
 	return entitlements, nil
 }
 
+/*
+ * Several configs could match the claims. We need to merge the scopes of all matching configs into a single scope.
+ * This is done by merging the repositories and permissions of all matching configs. In case of conflict, the highest permission is kept (admin > write > read)
+ */
 func computeScopes(claims jwt.MapClaims, entitlementConfig []Entitlement) *Scope {
 	scope := NewScope()
 
@@ -94,6 +106,9 @@ func computeScopes(claims jwt.MapClaims, entitlementConfig []Entitlement) *Scope
 	return scope
 }
 
+/*
+ * Once the scope has been computed, we can connect to GitHub as an installation and retrieve a scoped token
+ */
 func generateScopedToken(scope *Scope, installationId int64, appTransport *ghinstallation.AppsTransport) (ScopedTokenResponse, error) {
 	if scope == nil || scope.isEmpty() {
 		return ScopedTokenResponse{InstallationId: installationId, Message: "no scope matching these claims"}, nil
@@ -110,6 +125,9 @@ func generateScopedToken(scope *Scope, installationId int64, appTransport *ghins
 	return ScopedTokenResponse{InstallationId: installationId, GitHubToken: token.GetToken()}, nil
 }
 
+/*
+ * Handle http requests
+ */
 func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// Ping method to check we are up
 	if req.Method == http.MethodGet && req.RequestURI == "/ping" {
