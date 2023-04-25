@@ -213,12 +213,13 @@ func main() {
 		configFile = "oidc_entitlements.yml"
 	}
 
-	fmt.Printf("starting up on port %s\n", port)
-
 	appTransport, err := ghinstallation.NewAppsTransport(http.DefaultTransport, app_id, []byte(private_key))
 	if err != nil {
+		log.Println(private_key)
 		log.Fatal("Failed to initialize GitHub App transport:", err)
 	}
+
+	fmt.Printf("starting up on port %s\n", port)
 
 	gatewayContext := &GatewayContext{
 		jwksLastUpdate: time.Now(),
