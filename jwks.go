@@ -114,6 +114,7 @@ func stringifyMapClaims(claims jwt.MapClaims) string {
 
 func claimFieldValue(value interface{}) string {
 	if value == nil {
+		// This is to make sure we have a consistent representation of the claim for the regex matching
 		return "XXXNOTSETXXX"
 	} else {
 		return fmt.Sprint(value)

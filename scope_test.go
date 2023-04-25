@@ -114,3 +114,23 @@ func TestMergeWithExisingScope(t *testing.T) {
 		t.Error("Expected scope.Permissions to be", expectedPermissions, ", but got", baseScope.Permissions)
 	}
 }
+
+func TestString(t *testing.T) {
+	read := "read"
+	write := "write"
+	admin := "admin"
+
+	baseScope := Scope{
+		Repositories: []string{"test1", "test2"},
+		Permissions: github.InstallationPermissions{
+			Contents:             &read,
+			Checks:               &write,
+			OrganizationProjects: &admin,
+		},
+	}
+	baseScopeStr := baseScope.String()
+
+	if baseScopeStr != "{repositories: [test1, test2], permissions: {Checks: write, Contents: read, OrganizationProjects: admin}}" {
+		t.Error("Expected baseScope.String to be {repositories: [test1, test2], permissions: {Checks: write, Contents: read, OrganizationProjects: admin}}, but got", baseScopeStr)
+	}
+}

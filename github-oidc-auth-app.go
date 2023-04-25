@@ -23,6 +23,8 @@ type GatewayContext struct {
 	jwksCache      []byte
 	jwksLastUpdate time.Time
 	appTransport   *ghinstallation.AppsTransport
+	configRepo     string
+	configFile     string
 }
 
 type ScopedTokenRequest struct {
@@ -42,13 +44,12 @@ func getInstallationLogin(appTransport *ghinstallation.AppsTransport, installati
 	// Retrieve installation
 	installation, _, err := client.Apps.GetInstallation(context.Background(), installationId)
 	if err != nil {
-		log.Println("failed to get installation:", err)
 		return "", err
 	}
 	return installation.Account.GetLogin(), nil
 }
 
-func getEntitlementConfig(installationId int64, appTransport *ghinstallation.AppsTransport) ([]Entitlement, error) {
+func getEntitlementConfig(configRepo string, configFile string, installationId int64, appTransport *ghinstallation.AppsTransport) ([]Entitlement, error) {
 	login, err := getInstallationLogin(appTransport, installationId)
 	if err != nil {
 		return nil, err
@@ -59,16 +60,14 @@ func getEntitlementConfig(installationId int64, appTransport *ghinstallation.App
 	client := github.NewClient(&http.Client{Transport: itr})
 
 	// Retrieve the oidc_entitlements.yml file from the .github-private repository in the organization that owns the installation
-	fileContent, _, _, err := client.Repositories.GetContents(context.Background(), login, ".github-private", "oidc_entitlements.yml", &github.RepositoryContentGetOptions{})
+	fileContent, _, _, err := client.Repositories.GetContents(context.Background(), login, configRepo, configFile, &github.RepositoryContentGetOptions{})
 	if err != nil {
-		log.Println("failed to get file oidc_entitlements.yml in repository .github-private:", err)
 		return nil, err
 	}
 
 	// Get the content of the oidc_entitlements.yml file as a string
 	content, err := fileContent.GetContent()
 	if err != nil {
-		log.Println("failed to get content of file oidc_entitlements.yml in repository .github-private:", err)
 		return nil, err
 	}
 
@@ -76,7 +75,6 @@ func getEntitlementConfig(installationId int64, appTransport *ghinstallation.App
 	var entitlements []Entitlement
 	err = yaml.Unmarshal([]byte(content), &entitlements)
 	if err != nil {
-		log.Println("failed to unmarshal content of file oidc_entitlements.yml in repository .github-private:", err)
 		return nil, err
 	}
 	return entitlements, nil
@@ -93,9 +91,6 @@ func computeScopes(claims jwt.MapClaims, entitlementConfig []Entitlement) *Scope
 			scope.merge(entitlement.Scopes)
 		}
 	}
-
-	//log.Printf("Computed scopes: %v\n", scope)
-
 	return scope
 }
 
@@ -109,7 +104,6 @@ func generateScopedToken(scope *Scope, installationId int64, appTransport *ghins
 	client := github.NewClient(&http.Client{Transport: appTransport})
 	token, _, err := client.Apps.CreateInstallationToken(context.Background(), installationId, opts)
 	if err != nil {
-		log.Println("failed to get scoped token:", err)
 		return ScopedTokenResponse{}, err
 	}
 
@@ -135,7 +129,6 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		log.Println("Error retrieving request body.", err)
 		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
 		return
 	}
@@ -143,7 +136,6 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 	var scopedTokenRequest ScopedTokenRequest
 	err = json.Unmarshal([]byte(body), &scopedTokenRequest)
 	if err != nil {
-		log.Println("Error unmarshaling data from request.", err)
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
@@ -151,15 +143,16 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 	// Check that the OIDC token verifies as a valid token from GitHub
 	claims, err := validateTokenCameFromGitHub(scopedTokenRequest.OIDCToken, gatewayContext)
 	if err != nil {
-		log.Println(err)
+		log.Println("couldn't validate OIDC token provenance", err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
 
 	// Token is valid. We now need to generate a new token that is specific to our use case
 	// Retrieve the entitlement config for the installation
-	entitlementConfig, err := getEntitlementConfig(scopedTokenRequest.InstallationId, gatewayContext.appTransport)
+	entitlementConfig, err := getEntitlementConfig(gatewayContext.configRepo, gatewayContext.configFile, scopedTokenRequest.InstallationId, gatewayContext.appTransport)
 	if err != nil {
+		log.Println("couldn't get entitlement config", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -169,11 +162,12 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 
 	scopedTokenResponse, err := generateScopedToken(scope, scopedTokenRequest.InstallationId, gatewayContext.appTransport)
 	if err != nil {
+		log.Printf("failed to generate scoped tokens for claims: %v, %s\n", claims, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
-	log.Println(scopedTokenResponse)
+	log.Printf("succesfully generated token for claims: %v, with scopes %s\n", claims, scope.String())
 
 	// Return the new token to the client
 	w.Header().Set("Content-Type", "application/json")
@@ -189,6 +183,13 @@ func main() {
 	if err != nil {
 		log.Fatal("Wrong format for APP_ID")
 	}
+	var configRepo, configFile string
+	if configRepo = os.Getenv("CONFIG_REPO"); configRepo == "" {
+		configRepo = ".github-private"
+	}
+	if configFile = os.Getenv("CONFIG_FILE"); configFile == "" {
+		configFile = "oidc_entitlements.yml"
+	}
 
 	fmt.Printf("starting up on port %s\n", port)
 
@@ -197,7 +198,12 @@ func main() {
 		log.Fatal("Failed to initialize GitHub App transport:", err)
 	}
 
-	gatewayContext := &GatewayContext{jwksLastUpdate: time.Now(), appTransport: appTransport}
+	gatewayContext := &GatewayContext{
+		jwksLastUpdate: time.Now(),
+		appTransport:   appTransport,
+		configRepo:     configRepo,
+		configFile:     configFile,
+	}
 
 	server := http.Server{
 		Addr:         fmt.Sprintf(":%s", port),

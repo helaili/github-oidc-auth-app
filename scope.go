@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/google/go-github/v52/github"
 )
@@ -32,7 +34,7 @@ func (scope *Scope) isEmpty() bool {
 		if value.IsValid() && !value.IsZero() {
 			// Get the value of the field as a string
 			valueString := value.Elem().String()
-			if valueString != "none" {
+			if valueString != "" {
 				// We have at least one permission set
 				noPermissionSet = false
 				break
@@ -40,6 +42,29 @@ func (scope *Scope) isEmpty() bool {
 		}
 	}
 	return scope == nil || (len(scope.Repositories) == 0 && noPermissionSet)
+}
+
+func (scope *Scope) String() string {
+	kvPairs := []string{}
+	// Get the list of fields from the struct github.InstallationPermissions
+	fields := reflect.VisibleFields(reflect.TypeOf(struct{ github.InstallationPermissions }{}))
+
+	reflectScope := reflect.ValueOf(&scope.Permissions).Elem()
+
+	for _, field := range fields {
+		value := reflectScope.FieldByName(field.Name)
+
+		// Has this filed been set?
+		if value.IsValid() && !value.IsZero() {
+			// Get the value of the field as a string
+			valueString := value.Elem().String()
+			if valueString != "" {
+				kvPairs = append(kvPairs, fmt.Sprintf("%s: %s", field.Name, valueString))
+			}
+		}
+	}
+
+	return fmt.Sprintf("{repositories: [%s], permissions: {%s}}", strings.Join(scope.Repositories, ", "), strings.Join(kvPairs, ", "))
 }
 
 func (cumulativeScope *Scope) merge(additionalScope Scope) {
