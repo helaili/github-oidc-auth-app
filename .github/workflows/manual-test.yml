@@ -11,7 +11,7 @@ on:
 
 jobs:
   run:
-    uses: ./.github/actions/deployment-test.yml
+    uses: ./.github/workflows/deployment-test.yml@main
     with:
       endpoint: ${{ vars.ENDPOINT }}
       installaionId: ${{ vars.INSTALLATION_ID }}
