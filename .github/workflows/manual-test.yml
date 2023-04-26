@@ -9,11 +9,22 @@ on:
         default: 'production'
         required: true
 
+
 jobs:
+  setenv:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Set environment variables
+        run: |
+          echo "ENDPOINT=${{ vars.ENDPOINT }}" >> $GITHUB_ENV
+          echo "INSTALLATION_ID=${{ vars.INSTALLATION_ID }}" >> $GITHUB_ENV
+          
   run:
     uses: ./.github/workflows/deployment-test.yml
+    needs: setenv
     permissions:
       id-token: write
     with:
-      endpoint: ${{ vars.ENDPOINT }}
-      installationId: ${{ vars.INSTALLATION_ID }}
+      endpoint: ${{ env.ENDPOINT }}
+      installationId: ${{ env.INSTALLATION_ID }}
