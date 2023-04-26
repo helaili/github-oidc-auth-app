@@ -20,9 +20,9 @@ jobs:
         run: |
           echo "Environment: ${{ inputs.environment }}"
           echo "Endpoint: ${{ vars.ENDPOINT }}"
-          echo "Installaion ID: ${{ vars.INSTALLATION_ID }}" 
-          echo "name=endpoint::${{ vars.ENDPOINT }}" >> $GITHUB_OUTPUT
-          echo "name=installationId::${{ vars.INSTALLATION_ID }}" >> $GITHUB_OUTPUT
+          echo "Installation ID: ${{ vars.INSTALLATION_ID }}" 
+          echo "endpoint=${{ vars.ENDPOINT }}" >> $GITHUB_OUTPUT
+          echo "installationId=${{ vars.INSTALLATION_ID }}" >> $GITHUB_OUTPUT
   
   debug:
     runs-on: ubuntu-latest
@@ -31,7 +31,7 @@ jobs:
       - name: Echo environment variables
         run: |
           echo "Endpoint: ${{ needs.setenv.outputs.endpoint }}"
-          echo "Installaion ID: ${{ needs.setenv.outputs.installationId }}"
+          echo "Installation ID: ${{ needs.setenv.outputs.installationId }}"
 
   run:
     uses: ./.github/workflows/deployment-test.yml
