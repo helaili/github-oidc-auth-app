@@ -13,10 +13,13 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
+    environment: 
+      name: ${{ github.event.inputs.environment }}
+      url: ${{ steps.create_container_app.outputs.fqdn }}
     permissions:
       packages: read
       id-token: write
+      actions: write
     steps: 
     - name: Az CLI login
       uses: azure/login@v1
@@ -31,9 +34,10 @@ jobs:
     
     - name: Create container app environment
       run: |
-        az containerapp env create -n oidc-auth-${{ github.event.inputs.environment }}-env -g ${{ vars.RESSOURCE_GROUP }} 
+        az containerapp env create -n oidc-auth-${{ github.event.inputs.environment }}-env -g ${{ vars.RESSOURCE_GROUP }} --location eastus
           
     - name: Create container app
+      id: create_container_app
       run: |
         fqdn=$(az containerapp create -n oidc-auth-app-prod -g ${{ vars.RESSOURCE_GROUP }} \
             --image ghcr.io/${{ github.repository }}:main --environment oidc-auth-${{ github.event.inputs.environment }}-env \
@@ -43,3 +47,15 @@ jobs:
             --env-vars PORT=9090 PRIVATE_KEY=secretref:key APP_ID=${{ secrets.APP_ID }} \
             --query properties.configuration.ingress.fqdn -o tsv)
         echo "endpoint=$fqdn" >> $GITHUB_OUTPUT 
+    
+    - name: Update env
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ env.SCOPED_TOKEN }}
+        script: |
+          github.rest.actions.createEnvironmentVariable({
+            ${{ github.repository_id }},
+            ${{ github.event.inputs.environment }},
+            'ENDPOINT',
+            ${{ steps.create_container_app.outputs.fqdn }}/token,
+          })
