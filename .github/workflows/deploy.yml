@@ -53,7 +53,7 @@ jobs:
             --query properties.configuration.ingress.fqdn -o tsv)
         echo "endpoint=$fqdn" >> $GITHUB_OUTPUT 
     
-    - name: Update env
+    - name: Update env with curl
       run: | 
         curl -L \
         -X POST \
@@ -63,4 +63,16 @@ jobs:
         https://api.github.com/repositories/${{ github.repository_id }}/environments/${{ github.event.inputs.environment }}/variables \
         -d '{"name":"ENDPOINT","value":"${{ steps.create_container_app.outputs.endpoint }}/token"}'
       
-    
+    - name: Update env
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.MY_PAT }}
+        script: |
+          github.rest.actions.createEnvironmentVariable({
+            repository_id: ${{ github.repository_id }},
+            environment_name: ${{ github.event.inputs.environment }},
+            name: 'ENDPOINT',
+            value: ${{ steps.create_container_app.outputs.endpoint }}/token
+          })
+
+      
