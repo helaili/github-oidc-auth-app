@@ -56,7 +56,6 @@ jobs:
     - name: Update env
       uses: actions/github-script@v6
       with:
-        github-token: ${{ env.SCOPED_TOKEN }}
         script: |
           github.rest.actions.createEnvironmentVariable({
             ${{ github.repository_id }},
