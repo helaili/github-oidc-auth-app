@@ -186,7 +186,7 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 		return
 	}
 
-	if scopedTokenResponse.ScopedToken != "" {
+	if scopedTokenResponse.ScopedToken == "" {
 		log.Printf("no token generated for claims: %v\n", claims)
 	} else {
 		log.Printf("succesfully generated token for claims: %v, with scopes %s\n", claims, scope.String())

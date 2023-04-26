@@ -42,7 +42,23 @@ jobs:
               owner: 'octodemo',
               repo: 'codespace-oddity'
             }).then((response) => {
-              console.log(response.data)
+              if(!response.data.full_name) {
+                core.setFailed('Failed to access repo');
+              }
+            }).catch((error) => {
+              core.setFailed('Failed to access repo');
+            })
+
+            // Let's try to access a repo we should not have access to with this token
+            github.rest.repos.get({
+              owner: 'octodemo',
+              repo: '.github-private'
+            }).then((response) => {
+              if(response.data.full_name) {
+                core.setFailed('We should not be able to access this repo, that is not expected');
+              }
+            }).catch((error) => {
+              console.log('We should not be able to access this repo, this is expected')
             })
 
   no-configured-entitlement:
