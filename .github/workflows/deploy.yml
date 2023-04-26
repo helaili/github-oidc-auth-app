@@ -61,5 +61,5 @@ jobs:
             repository_id: ${{ github.repository_id }},
             environment_name: ${{ github.event.inputs.environment }},
             name: 'ENDPOINT',
-            value: ${{ steps.create_container_app.outputs.fqdn }}/token
+            value: ${{ steps.create_container_app.outputs.endpoint }}/token
           })
