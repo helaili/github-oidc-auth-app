@@ -34,7 +34,13 @@ jobs:
     
     - name: Create container app environment
       run: |
-        az containerapp env create -n oidc-auth-${{ github.event.inputs.environment }}-env -g ${{ vars.RESSOURCE_GROUP }} --location eastus
+        envId=$(az containerapp env show -n oidc-auth-production-env -g oidc-auth-app --query id -o tsv)
+        if [ -n "$var" ]; then
+          echo "Container app env already exists"
+        else
+          az containerapp env create -n oidc-auth-${{ github.event.inputs.environment }}-env -g ${{ vars.RESSOURCE_GROUP }} --location eastus
+        fi
+        
           
     - name: Create container app
       id: create_container_app
