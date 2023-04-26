@@ -58,8 +58,8 @@ jobs:
       with:
         script: |
           github.rest.actions.createEnvironmentVariable({
-            ${{ github.repository_id }},
-            ${{ github.event.inputs.environment }},
-            'ENDPOINT',
-            ${{ steps.create_container_app.outputs.fqdn }}/token,
+            repository_id: ${{ github.repository_id }},
+            environment_name: ${{ github.event.inputs.environment }},
+            name: 'ENDPOINT',
+            value: ${{ steps.create_container_app.outputs.fqdn }}/token
           })
