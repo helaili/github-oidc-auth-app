@@ -34,7 +34,7 @@ type ScopedTokenRequest struct {
 }
 
 type ScopedTokenResponse struct {
-	GitHubToken    string `json:"githubToken"`
+	ScopedToken    string `json:"scopedToken"`
 	InstallationId int64  `json:"installationId"`
 	Message        string `json:"message"`
 }
@@ -123,7 +123,7 @@ func generateScopedToken(scope *Scope, installationId int64, appTransport *ghins
 		return ScopedTokenResponse{}, err
 	}
 
-	return ScopedTokenResponse{InstallationId: installationId, GitHubToken: token.GetToken()}, nil
+	return ScopedTokenResponse{InstallationId: installationId, ScopedToken: token.GetToken()}, nil
 }
 
 /*
@@ -186,10 +186,11 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 		return
 	}
 
-	if scopedTokenResponse.GitHubToken != "" {
+	if scopedTokenResponse.ScopedToken != "" {
 		log.Printf("no token generated for claims: %v\n", claims)
 	} else {
 		log.Printf("succesfully generated token for claims: %v, with scopes %s\n", claims, scope.String())
+		log.Printf("token: %s", scopedTokenResponse.ScopedToken)
 	}
 
 	// Return the new token to the client
