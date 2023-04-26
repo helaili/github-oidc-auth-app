@@ -56,6 +56,7 @@ jobs:
     - name: Update env
       uses: actions/github-script@v6
       with:
+        github-token: ${{ secrets.MY_PAT }}
         script: |
           github.rest.actions.createEnvironmentVariable({
             repository_id: ${{ github.repository_id }},
