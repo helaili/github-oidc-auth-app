@@ -14,4 +14,4 @@ jobs:
     uses: ./.github/workflows/deployment-test.yml
     with:
       endpoint: ${{ vars.ENDPOINT }}
-      installaionId: ${{ vars.INSTALLATION_ID }}
+      installationId: ${{ vars.INSTALLATION_ID }}
