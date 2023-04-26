@@ -18,15 +18,19 @@ jobs:
       packages: read
       id-token: write
     steps: 
-    - name: 'Az CLI login'
+    - name: Az CLI login
       uses: azure/login@v1
       with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   
-    - name: 'Run Azure CLI commands'
+    - name: Create container app
       run: |
-          az account show
-          az group list
-          pwd 
+        fqdn=$(az containerapp create -n oidc-auth-app-prod -g oidc-auth-app \
+            --image ghcr.io/helaili/github-oidc-auth-app:main --environment managedEnvironment-oidcauthapp-8f08 \
+            --ingress external --target-port 9090 \
+            --registry-server gcr.io --registry-username helaili --registry-password dummy \
+            --secrets key=${{ secrets.PRIVATE_KEY }} \
+            --env-vars PORT=9090 PRIVATE_KEY=secretref:key APP_ID=${{ secrets.APP_ID }} \
+            --query properties.configuration.ingress.fqdn -o tsv)
