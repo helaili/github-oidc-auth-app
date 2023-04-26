@@ -12,6 +12,8 @@ on:
 jobs:
   run:
     uses: ./.github/workflows/deployment-test.yml
+    permissions:
+      id-token: write
     with:
       endpoint: ${{ vars.ENDPOINT }}
       installationId: ${{ vars.INSTALLATION_ID }}
