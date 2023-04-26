@@ -12,11 +12,15 @@ on:
 
 jobs:
   setenv:
+    name: Set environment variables
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     steps:
       - name: Set environment variables
         run: |
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Endpoint: ${{ vars.ENDPOINT }}"
+          echo "Installaion ID: ${{ vars.INSTALLATION_ID }}" 
           echo "name=endpoint::${{ vars.ENDPOINT }}" >> $GITHUB_OUTPUT
           echo "name=installationId::${{ vars.INSTALLATION_ID }}" >> $GITHUB_OUTPUT
   
