@@ -44,6 +44,8 @@ jobs:
             }).then((response) => {
               if(!response.data.full_name) {
                 core.setFailed('Failed to access repo');
+              } else {
+                console.log('Successfully accessed repo octodemo/codespace-oddity');
               }
             }).catch((error) => {
               core.setFailed('Failed to access repo');
@@ -58,7 +60,7 @@ jobs:
                 core.setFailed('We should not be able to access this repo, that is not expected');
               }
             }).catch((error) => {
-              console.log('We should not be able to access this repo, this is expected')
+              console.log('We should not be able to access octodemo/.github-private, this is expected')
             })
 
   no-configured-entitlement:
