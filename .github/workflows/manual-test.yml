@@ -2,6 +2,7 @@ name: Manual Test Workflow
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   should-work:
@@ -15,7 +16,7 @@ jobs:
           echo "OIDC_TOKEN=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" -H "Accept: application/json; api-version=2.0" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://ActionsOIDCGateway" | jq -r ".value")"  >> $GITHUB_ENV
       - name: Retrieving the token 
         run: |
-          echo "SCOPED_TOKEN=$(curl --header "Content-Type: application/json" --request POST  --data '{"oidcToken":"${{ env.OIDC_TOKEN }}","installationId":${{ env.INSTALLATION_ID }}}' ${{ env.ENPOINT }} | jq -r ".githubToken")" >> $GITHUB_ENV
+          echo "SCOPED_TOKEN=$(curl --header "Content-Type: application/json" --request POST  --data '{"oidcToken":"${{ env.OIDC_TOKEN }}","installationId":${{ vars.INSTALLATION_ID }}}' ${{ vars.ENPOINT }} | jq -r ".githubToken")" >> $GITHUB_ENV
       - name: Check the token 
         run: |
           if [ -n "$SCOPED_TOKEN" ]; then
@@ -48,7 +49,7 @@ jobs:
           echo "OIDC_TOKEN=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" -H "Accept: application/json; api-version=2.0" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://ActionsOIDCGateway" | jq -r ".value")"  >> $GITHUB_ENV
       - name: Retrieving the token 
         run: |
-          echo "SCOPED_TOKEN=$(curl --header "Content-Type: application/json" --request POST  --data '{"oidcToken":"${{ env.OIDC_TOKEN }}","installationId":${{ env.INSTALLATION_ID }}}' ${{ env.ENPOINT }} | jq -r ".githubToken")" >> $GITHUB_ENV
+          echo "SCOPED_TOKEN=$(curl --header "Content-Type: application/json" --request POST  --data '{"oidcToken":"${{ env.OIDC_TOKEN }}","installationId":${{ vars.INSTALLATION_ID }}}' ${{ vars.ENPOINT }} | jq -r ".githubToken")" >> $GITHUB_ENV
       - name: Check the token 
         run: |
           if [ -n "$SCOPED_TOKEN" ]; then
@@ -70,7 +71,7 @@ jobs:
           echo "OIDC_TOKEN=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" -H "Accept: application/json; api-version=2.0" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://ActionsOIDCGateway" | jq -r ".value")"  >> $GITHUB_ENV
       - name: Retrieving the token 
         run: |
-          echo "SCOPED_TOKEN=$(curl --header "Content-Type: application/json" --request POST  --data '{"oidcToken":"${{ env.OIDC_TOKEN }}","installationId":${{ env.INSTALLATION_ID }}}' ${{ env.ENPOINT }} | jq -r ".githubToken")" >> $GITHUB_ENV
+          echo "SCOPED_TOKEN=$(curl --header "Content-Type: application/json" --request POST  --data '{"oidcToken":"${{ env.OIDC_TOKEN }}","installationId":${{ vars.INSTALLATION_ID }}}' ${{ vars.ENPOINT }} | jq -r ".githubToken")" >> $GITHUB_ENV
       - name: Check the token 
         run: |
           if [ -n "$SCOPED_TOKEN" ]; then
