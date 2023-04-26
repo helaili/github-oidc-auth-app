@@ -5,7 +5,7 @@ on:
     inputs:
       installationId:
         description: 'GitHub App Installation #'
-        type: number
+        type: string
         required: true
       endpoint:
         description: 'Endpoint to use'
