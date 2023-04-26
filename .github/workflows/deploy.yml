@@ -13,6 +13,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
     permissions:
       packages: read
       id-token: write
