@@ -20,21 +20,33 @@ jobs:
       id-token: write
       actions: write
     steps: 
-    - name: Update env with curl
-      uses: actions/github-script@v6
-      env:
-        GITHUB_TOKEN: ${{ secrets.MY_PAT }}
-      with:
-        script: |
-          github.request("GET /repositories/${{ github.repository_id }}/environments/${{ github.event.inputs.environment }}/variables/ENDPOINT").then((result) => {
-            console.log('ENDPOINT', result)
-          }).catch((err) => {
-            console.log('ENDPOINT', err)
-          })
+    - name: Update env with curl - name: Update env with curl
+    run: | 
+      currentValue=$(curl -L \
+        -X GET \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${{ secrets.MY_PAT }}" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        https://api.github.com/repositories/${{ github.repository_id }}/environments/${{ github.event.inputs.environment }}/variables/ENDPOINT | jq -r ".value")
+      
+      if [ -n "$currentValue" ]; then
+        # Update the value
+        curl -L \
+          -X PATCH \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.MY_PAT }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repositories/${{ github.repository_id }}/environments/${{ github.event.inputs.environment }}/variables/ENDPOINT \
+          -d '{"name":"ENDPOINT","value":"https://xxxx/token"}'
+      else
+        # Set the value
+        curl -L \
+          -X PATCH \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.MY_PAT }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repositories/${{ github.repository_id }}/environments/${{ github.event.inputs.environment }}/variables \
+          -d '{"name":"ENDPOINT","value":"https://xxxx/token"}'
+      fi
 
-          github.request("GET /repositories/${{ github.repository_id }}/environments/${{ github.event.inputs.environment }}/variables/XXX").then((result) => {
-            console.log('XXX', result)
-          }).catch((err) => {
-            console.log('XXX', err)
-          })
-  
+          
