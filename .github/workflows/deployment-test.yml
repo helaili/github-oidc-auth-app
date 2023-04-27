@@ -43,12 +43,12 @@ jobs:
               repo: 'codespace-oddity'
             }).then((response) => {
               if(!response.data.full_name) {
-                core.setFailed('Failed to access repo');
+                core.setFailed(`Failed to access repo octodemo/codespace-oddity. Response was ${response}`);
               } else {
                 console.log('Successfully accessed repo octodemo/codespace-oddity');
               }
             }).catch((error) => {
-              core.setFailed('Failed to access repo');
+              core.setFailed(`Failed to access repo. Error was ${error}`);
             })
 
             // Let's try to access a repo we should not have access to with this token
