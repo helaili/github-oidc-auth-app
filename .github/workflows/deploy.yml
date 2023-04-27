@@ -67,7 +67,6 @@ jobs:
         with:
           cosign-release: 'v1.13.1'
 
-
       # Workaround: https://github.com/docker/build-push-action/issues/461
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
@@ -117,7 +116,20 @@ jobs:
         # against the sigstore community Fulcio instance.
         run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
 
-  run:
+  setenv:
+    name: Set environment variables
+    runs-on: ubuntu-latest
+    environment: production
+    outputs: 
+      installationId: ${{ steps.setenv.outputs.installationId }}
+    steps:
+      - name: Set environment variables
+        id: setenv
+        run: |
+          echo "Installation ID: ${{ vars.INSTALLATION_ID }}" 
+          echo "installationId=${{ vars.INSTALLATION_ID }}" >> $GITHUB_OUTPUT
+  
+  deploy:
     uses: ./.github/workflows/deploy-azure-container-app.yml
     needs: publish
     permissions:
@@ -125,4 +137,15 @@ jobs:
       packages: read
       actions: write
     with:
-      environment: ${{ vars.ENVIRONMENT_NAME }} 
+      environment: production
+  
+  run:
+    uses: ./.github/workflows/deployment-test.yml
+    needs: 
+      - deploy
+      - setenv
+    permissions:
+      id-token: write
+    with:
+      endpoint: ${{ needs.deploy.outputs.endpoint }}
+      installationId: ${{ needs.setenv.outputs.installationId }}

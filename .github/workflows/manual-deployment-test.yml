@@ -27,7 +27,7 @@ jobs:
           echo "endpoint=${{ vars.ENDPOINT }}" >> $GITHUB_OUTPUT
           echo "installationId=${{ vars.INSTALLATION_ID }}" >> $GITHUB_OUTPUT
           
-  run:
+  test:
     uses: ./.github/workflows/deployment-test.yml
     needs: setenv
     permissions:
