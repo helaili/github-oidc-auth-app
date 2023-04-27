@@ -27,11 +27,21 @@ jobs:
       with:
         script: |
           github.rest.actions.getEnvironmentVariable({
-            ${{ github.repository_id }},
-            ${{ github.event.inputs.environment }},
-            'ENDPOINT'
+            repository_id: ${{ github.repository_id }},
+            environment_name: ${{ github.event.inputs.environment }},
+            name: 'ENDPOINT'
           }).then((result) => {
-            console.log(result)
+            console.log('ENDPOINT', result)
           }).catch((err) => {
-            console.log(err)
+            console.log('ENDPOINT', err)
+          })
+
+          github.rest.actions.getEnvironmentVariable({
+            repository_id: ${{ github.repository_id }},
+            environment_name: ${{ github.event.inputs.environment }},
+            name: 'XXXX'
+          }).then((result) => {
+            console.log('XXXX', result)
+          }).catch((err) => {
+            console.log('XXXX', err)
           })
