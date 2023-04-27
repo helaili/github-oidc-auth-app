@@ -132,6 +132,7 @@ jobs:
   deploy:
     uses: ./.github/workflows/deploy-azure-container-app.yml
     needs: publish
+    secrets: inherit #
     permissions:
       id-token: write
       packages: read
