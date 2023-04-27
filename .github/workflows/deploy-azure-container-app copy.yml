@@ -28,7 +28,7 @@ jobs:
         script: |
           github.rest.actions.getEnvironmentVariable({
             repository_id: ${{ github.repository_id }},
-            environment_name: ${{ github.event.inputs.environment }},
+            environment_name: '${{ github.event.inputs.environment }}',
             name: 'ENDPOINT'
           }).then((result) => {
             console.log('ENDPOINT', result)
@@ -38,7 +38,7 @@ jobs:
 
           github.rest.actions.getEnvironmentVariable({
             repository_id: ${{ github.repository_id }},
-            environment_name: ${{ github.event.inputs.environment }},
+            environment_name: '${{ github.event.inputs.environment }}',
             name: 'XXXX'
           }).then((result) => {
             console.log('XXXX', result)
