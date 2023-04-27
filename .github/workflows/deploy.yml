@@ -1,66 +1,128 @@
-name: Deploy
+name: Publish and Deploy
 
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Selection of the target endpoint'
-        type: environment
-        default: 'production'
-        required: true
+  schedule:
+    - cron: '25 21 * * *'
+  push:
+    branches: [ "main" ]
+    # Publish semver tags as releases.
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+  ENVIRONMENT_NAME: production
 
 jobs:
-  deploy:
-    name: Deploy
+  build:
     runs-on: ubuntu-latest
-    environment: 
-      name: ${{ github.event.inputs.environment }}
-      url: https://${{ steps.create_container_app.outputs.endpoint }}
     permissions:
-      packages: read
-      id-token: write
-      actions: write
-    steps: 
-    - name: Az CLI login
-      uses: azure/login@v1
-      with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-    
-    - name: Configure Azure CLI
-      run: |
-        az config set extension.use_dynamic_install=yes_without_prompt
-    
-    - name: Create container app environment
-      run: |
-        envId=$(az containerapp env show -n oidc-auth-production-env -g oidc-auth-app --query id -o tsv)
-        if [ -n "$envId" ]; then
-          echo "Container app env already exists"
-        else
-          az containerapp env create -n oidc-auth-${{ github.event.inputs.environment }}-env -g ${{ vars.RESSOURCE_GROUP }} --location eastus
-        fi
-        
-    - name: Create container app
-      id: create_container_app
-      run: |
-        fqdn=$(az containerapp create -n oidc-auth-app-prod -g ${{ vars.RESSOURCE_GROUP }} \
-            --image ghcr.io/${{ github.repository }}:main --environment oidc-auth-${{ github.event.inputs.environment }}-env \
-            --ingress external --target-port 9090 \
-            --registry-server gcr.io --registry-username ${{ github.repository_owner }} --registry-password dummy \
-            --secrets key=${{ secrets.PRIVATE_KEY }} \
-            --env-vars PORT=9090 PRIVATE_KEY=secretref:key APP_ID=${{ secrets.APP_ID }} \
-            --query properties.configuration.ingress.fqdn -o tsv)
-        echo "endpoint=$fqdn" >> $GITHUB_OUTPUT 
-    
-    - name: Update env with curl
-      run: | 
-        curl -L \
-        -X PATCH \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer ${{ secrets.MY_PAT }}" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        https://api.github.com/repositories/${{ github.repository_id }}/environments/${{ github.event.inputs.environment }}/variables \
-        -d '{"name":"ENDPOINT","value":"https://  ${{ steps.create_container_app.outputs.endpoint }}/token"}'
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
   
+      - name: Build
+        run: go build -v ./...
+  
+      - name: Test
+        run: go test -v ./...
+  
+  publish:
+    runs-on: ubuntu-latest
+    needs: 
+      - build
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+  
+      - name: Build
+        run: go build -v ./...
+
+      # Install the cosign tool except on PR
+      # https://github.com/sigstore/cosign-installer
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@f3c664df7af409cb4873aa5068053ba9d61a57b6 #v2.6.0
+        with:
+          cosign-release: 'v1.13.1'
+
+
+      # Workaround: https://github.com/docker/build-push-action/issues/461
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+
+      # Sign the resulting Docker image digest except on PRs.
+      # This will only write to the public Rekor transparency log when the Docker
+      # repository is public to avoid leaking data.  If you would like to publish
+      # transparency data even for private images, pass --force to cosign below.
+      # https://github.com/sigstore/cosign
+      - name: Sign the published Docker image
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        # This step uses the identity token to provision an ephemeral certificate
+        # against the sigstore community Fulcio instance.
+        run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
+
+  run:
+    uses: ./.github/workflows/deploy-azure-container-app.yml
+    needs: publish
+    permissions:
+      id-token: write
+      packages: read
+      actions: write
+    with:
+      environment: ${{ vars.ENVIRONMENT_NAME }} 

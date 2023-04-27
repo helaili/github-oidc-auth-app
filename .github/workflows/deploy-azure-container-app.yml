@@ -1,0 +1,73 @@
+name: Deploy to Azure Container App
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Selection of the target endpoint'
+        type: environment
+        default: 'production'
+        required: true
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Selection of the target endpoint'
+        type: string
+        default: 'production'
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: 
+      name: ${{ github.event.inputs.environment }}
+      url: https://${{ steps.create_container_app.outputs.endpoint }}
+    permissions:
+      packages: read
+      id-token: write
+      actions: write
+    steps: 
+    - name: Az CLI login
+      uses: azure/login@v1
+      with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    
+    - name: Configure Azure CLI
+      run: |
+        az config set extension.use_dynamic_install=yes_without_prompt
+    
+    - name: Create container app environment
+      run: |
+        envId=$(az containerapp env show -n oidc-auth-production-env -g oidc-auth-app --query id -o tsv)
+        if [ -n "$envId" ]; then
+          echo "Container app env already exists"
+        else
+          az containerapp env create -n oidc-auth-${{ github.event.inputs.environment }}-env -g ${{ vars.RESSOURCE_GROUP }} --location eastus
+        fi
+        
+    - name: Create container app
+      id: create_container_app
+      run: |
+        fqdn=$(az containerapp create -n oidc-auth-app-prod -g ${{ vars.RESSOURCE_GROUP }} \
+            --image ghcr.io/${{ github.repository }}:main --environment oidc-auth-${{ github.event.inputs.environment }}-env \
+            --ingress external --target-port 9090 \
+            --registry-server gcr.io --registry-username ${{ github.repository_owner }} --registry-password dummy \
+            --secrets key=${{ secrets.PRIVATE_KEY }} \
+            --env-vars PORT=9090 PRIVATE_KEY=secretref:key APP_ID=${{ secrets.APP_ID }} \
+            --query properties.configuration.ingress.fqdn -o tsv)
+        echo "endpoint=$fqdn" >> $GITHUB_OUTPUT 
+    
+    - name: Update env with curl
+      run: | 
+        curl -L \
+        -X PATCH \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${{ secrets.MY_PAT }}" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        https://api.github.com/repositories/${{ github.repository_id }}/environments/${{ github.event.inputs.environment }}/variables \
+        -d '{"name":"ENDPOINT","value":"https://${{ steps.create_container_app.outputs.endpoint }}/token"}'
+
+  

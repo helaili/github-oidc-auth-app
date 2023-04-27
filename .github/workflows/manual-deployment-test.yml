@@ -1,4 +1,4 @@
-name: Manual Test
+name: Manual Deployment Test
 
 on:
   workflow_dispatch:
@@ -8,7 +8,6 @@ on:
         type: environment
         default: 'production'
         required: true
-
 
 jobs:
   setenv:
