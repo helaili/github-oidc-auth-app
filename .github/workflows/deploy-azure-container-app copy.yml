@@ -26,22 +26,15 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.MY_PAT }}
       with:
         script: |
-          github.rest.actions.getEnvironmentVariable({
-            repository_id: ${{ github.repository_id }},
-            environment_name: '${{ github.event.inputs.environment }}',
-            name: 'ENDPOINT'
-          }).then((result) => {
+          github.request("GET /repositories/${{ github.repository_id }}/environments/${{ github.event.inputs.environment }}/variables/ENDPOINT").then((result) => {
             console.log('ENDPOINT', result)
           }).catch((err) => {
             console.log('ENDPOINT', err)
           })
 
-          github.rest.actions.getEnvironmentVariable({
-            repository_id: ${{ github.repository_id }},
-            environment_name: '${{ github.event.inputs.environment }}',
-            name: 'XXXX'
-          }).then((result) => {
-            console.log('XXXX', result)
+          github.request("GET /repositories/${{ github.repository_id }}/environments/${{ github.event.inputs.environment }}/variables/XXX").then((result) => {
+            console.log('XXX', result)
           }).catch((err) => {
-            console.log('XXXX', err)
+            console.log('XXX', err)
           })
+  
