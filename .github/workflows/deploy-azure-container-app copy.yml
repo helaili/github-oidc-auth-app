@@ -1,0 +1,37 @@
+name: TEST VAR
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Selection of the target endpoint'
+        type: environment
+        default: 'production'
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: 
+      name: ${{ github.event.inputs.environment }}
+    permissions:
+      packages: read
+      id-token: write
+      actions: write
+    steps: 
+    - name: Update env with curl
+      uses: actions/github-script@v6
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_PAT }}
+      with:
+        script: |
+          github.rest.actions.getEnvironmentVariable({
+            ${{ github.repository_id }},
+            ${{ github.event.inputs.environment }},
+            'ENDPOINT'
+          }).then((result) => {
+            console.log(result)
+          }).catch((err) => {
+            console.log(err)
+          })
