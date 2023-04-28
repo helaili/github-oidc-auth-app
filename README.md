@@ -128,7 +128,7 @@ See the the `properties of permissions sections` [here](https://docs.github.com/
 
 
 ## Use the action
-The companion action `helaili/github-oidc-auth` will retrieve the scoped token. 
+The companion action [`helaili/github-oidc-auth`](https://github.com/helaili/github-oidc-auth) will retrieve the scoped token. 
 
 
 ```yaml
