@@ -147,11 +147,11 @@ should-work-with-action:
         uses: actions/github-script@v6
         with:
           github-token: ${{ env.SCOPED_TOKEN }}
-        ...
-```   - name: Use the token from the step output
+        ...   
+      - name: Use the token from the step output
         uses: actions/github-script@v6
         with:
           github-token: ${{ steps.getToken.outputs.scopedToken }}
 
         ...
-```yaml
+```
