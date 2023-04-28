@@ -13,7 +13,7 @@ on:
         required: true
   
 jobs:
-  should-work:
+  should-work-with-curl:
     runs-on: ubuntu-latest
     environment: production
     permissions:
@@ -33,6 +33,48 @@ jobs:
             echo "::error title=Failed to get token::Empty token, something went wrong"
             exit 0
           fi
+      - name: Use the token
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ env.SCOPED_TOKEN }}
+          script: |
+            github.rest.repos.get({
+              owner: 'octodemo',
+              repo: 'codespace-oddity'
+            }).then((response) => {
+              if(!response.data.full_name) {
+                core.setFailed(`Failed to access repo octodemo/codespace-oddity. Response was ${response}`);
+              } else {
+                console.log('Successfully accessed repo octodemo/codespace-oddity');
+              }
+            }).catch((error) => {
+              core.setFailed(`Failed to access repo. Error was ${error}`);
+            })
+
+            // Let's try to access a repo we should not have access to with this token
+            github.rest.repos.get({
+              owner: 'octodemo',
+              repo: '.github-private'
+            }).then((response) => {
+              if(response.data.full_name) {
+                core.setFailed('We should not be able to access this repo, that is not expected');
+              }
+            }).catch((error) => {
+              console.log('We should not be able to access octodemo/.github-private, this is expected')
+            })
+
+  should-work-with-action:
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+    steps:
+      - name: GetToken
+        id: getToken
+        uses: helaili/github-oidc-auth@main
+        with:
+          installationId: ${{ inputs.installationId }}
+          endpoint: ${{ inputs.endpoint }}
       - name: Use the token
         uses: actions/github-script@v6
         with:
