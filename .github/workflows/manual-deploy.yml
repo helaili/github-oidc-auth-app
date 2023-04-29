@@ -10,11 +10,10 @@ on:
         required: true
 
 jobs:
-  
   setenv:
     name: Set environment variables
     runs-on: ubuntu-latest
-    environment: production
+    environment: ${{ inputs.environment }}
     outputs: 
       installationId: ${{ steps.setenv.outputs.installationId }}
       environment: ${{ steps.setenv.outputs.environment }}
@@ -42,12 +41,28 @@ jobs:
       environment: ${{ inputs.environment }}
   
   test:
-    uses: ./.github/workflows/deployment-test.yml
     needs:
       - setenv
       - deploy
     permissions:
       id-token: write
-    with:
-      endpoint: ${{ vars.endpoint }}
-      installationId: ${{ needs.setenv.outputs.installationId }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Use the token from the output
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ steps.getToken.outputs.scopedToken }}
+          script: |
+            github.rest.repos.get({
+              owner: 'carbonhub',
+              repo: 'website'
+            }).then((response) => {
+              if(!response.data.full_name) {
+                core.setFailed(`Failed to access repo carbonhub/website. Response was ${response}`);
+              } else {
+                console.log('Successfully accessed repo carbonhub/website');
+              }
+            }).catch((error) => {
+              core.setFailed(`Failed to access repo. Error was ${error}`);
+            })
