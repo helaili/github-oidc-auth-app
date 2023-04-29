@@ -49,6 +49,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: GetToken
+        id: getToken
+        uses: ./
+        with:
+          installationId: ${{ vars.INSTALLATION_ID }}
+          endpoint: ${{ vars.ENDPOINT }}
       - name: Use the token from the output
         uses: actions/github-script@v6
         with:
