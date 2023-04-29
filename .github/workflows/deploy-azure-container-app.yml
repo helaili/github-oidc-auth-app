@@ -47,7 +47,7 @@ jobs:
     
     - name: Create container app environment
       run: |
-        envId=$(az containerapp env show -n oidc-auth-${{ inputs.environment }}-env -g oidc-auth-app --query id -o tsv)
+        envId=$(az containerapp env show -n oidc-auth-${{ inputs.environment }}-env -g oidc-auth-app --query id -o tsv --only-show-errors 2>nul)
         if [ -n "$envId" ]; then
           echo "Container app env already exists"
         else
