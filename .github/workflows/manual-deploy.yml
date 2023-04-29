@@ -1,37 +1,52 @@
-name: Manual Deployment Test
+name: Manual Deploy
 
 on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Selection of the target environment'
+        description: 'Selection of the target endpoint'
         type: environment
-        default: 'production'
+        default: 'sandbox'
         required: true
 
 jobs:
+  
   setenv:
     name: Set environment variables
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
+    environment: production
     outputs: 
-      endpoint: ${{ steps.setenv.outputs.endpoint }}
       installationId: ${{ steps.setenv.outputs.installationId }}
+      environment: ${{ steps.setenv.outputs.environment }}
     steps:
       - name: Set environment variables
         id: setenv
         run: |
-          echo "Environment: ${{ inputs.environment }}"
-          echo "Endpoint: ${{ vars.ENDPOINT }}"
           echo "Installation ID: ${{ vars.INSTALLATION_ID }}" 
-          echo "endpoint=${{ vars.ENDPOINT }}" >> $GITHUB_OUTPUT
           echo "installationId=${{ vars.INSTALLATION_ID }}" >> $GITHUB_OUTPUT
-          
+  
+  deploy:
+    name: Deploy
+    needs:
+      - setenv
+    concurrency:
+      group: ${{ github.workflow }}-${{ inputs.environment }}
+      cancel-in-progress: true
+    uses: ./.github/workflows/deploy-azure-container-app.yml
+    secrets: inherit 
+    permissions:
+      id-token: write
+      packages: read
+      actions: write
+    with:
+      environment: ${{ inputs.environment }}
+  
   test:
     uses: ./.github/workflows/deployment-test.yml
-    needs: setenv
+    needs:
+      - setenv
     permissions:
       id-token: write
     with:
-      endpoint: ${{ needs.setenv.outputs.endpoint }}
+      endpoint: ${{ vars.endpoint }}
       installationId: ${{ needs.setenv.outputs.installationId }}
