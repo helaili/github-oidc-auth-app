@@ -46,13 +46,9 @@ jobs:
         az config set extension.use_dynamic_install=yes_without_prompt
     
     - name: Create container app environment
+      continue-on-error: true
       run: |
-        envId=$(az containerapp env show -n oidc-auth-${{ inputs.environment }}-env -g oidc-auth-app --query id -o tsv --only-show-errors 2>nul)
-        if [ -n "$envId" ]; then
-          echo "Container app env already exists"
-        else
-          az containerapp env create -n oidc-auth-${{ inputs.environment }}-env -g ${{ vars.RESSOURCE_GROUP }} --location eastus
-        fi
+        az containerapp env create -n oidc-auth-${{ inputs.environment }}-env -g ${{ vars.RESSOURCE_GROUP }} --location eastus
         
     - name: Create container app
       id: create_container_app
