@@ -94,6 +94,8 @@ cat private-key.pem | base64
       - codespace-oddity
     permissions: 
       contents: write
+      checks: write
+      administration: read
 - environment: production
   repository_owner: talkingheads
   repository_visibility: public
@@ -123,6 +125,25 @@ permissions:
   organization_administration: write
  ```
 
+Remember that the app you created needs to have the permissions of all the different scoped tokens it will generate. Therefore, with the configuration above, the app  will need to have the following permissions:
+```yaml
+- contents: write
+- checks: write
+- administration: read
+- organization_administration: write
+```
+
+The list of claims currently supported by this app is currently limited to the list below. See the [GitHub documentation](https://docs.github.com/en/enterprise-cloud@latest/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#configuring-the-oidc-trust-with-the-cloud) for more details about the meaning of these claims.
+- actor
+- environment
+- event_name
+- ref
+- repository
+- repository_owner
+- repository_visibility
+- workflow
+
+:rotating_light: **Important**: If you set loose claim filters in your configuration (like just `environment: production`), anyone with one of the installation ID and the URL of the app will be able to generate a token with the matching permission. Using such loose conditions means you need to treat these paramaters as secrets, but I would strongly advise to always include extra information that can not be faked such as the repository owner name.
 
 See the the `properties of permissions` section [here](https://docs.github.com/en/enterprise-cloud@latest/rest/apps/apps?apiVersion=2022-11-28#create-a-scoped-access-token) to see the list of permissions and their values.
 
@@ -155,3 +176,9 @@ should-work-with-action:
 
         ...
 ```
+
+# Giving it a try
+
+You might to give this app and action a try without going through the hassle of creating a new GitHub app and deploying it somewhere. Make sense, so I created a sandbox for you. 
+
+```yaml
