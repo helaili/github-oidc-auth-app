@@ -45,6 +45,7 @@ jobs:
     uses: ./.github/workflows/deployment-test.yml
     needs:
       - setenv
+      - deploy
     permissions:
       id-token: write
     with:
