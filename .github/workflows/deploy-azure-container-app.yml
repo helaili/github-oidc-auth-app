@@ -47,7 +47,7 @@ jobs:
     
     - name: Create container app environment
       run: |
-        envId=$(az containerapp env show -n oidc-auth-production-env -g oidc-auth-app --query id -o tsv)
+        envId=$(az containerapp env show -n oidc-auth-${{ inputs.environment }}-env -g oidc-auth-app --query id -o tsv)
         if [ -n "$envId" ]; then
           echo "Container app env already exists"
         else
@@ -57,7 +57,7 @@ jobs:
     - name: Create container app
       id: create_container_app
       run: |
-        fqdn=$(az containerapp create -n oidc-auth-app-prod -g ${{ vars.RESSOURCE_GROUP }} \
+        fqdn=$(az containerapp create -n oidc-auth-app-${{ inputs.environment }} -g ${{ vars.RESSOURCE_GROUP }} \
             --image ghcr.io/${{ github.repository }}:main --environment oidc-auth-${{ inputs.environment }}-env \
             --ingress external --target-port 9090 \
             --registry-server gcr.io --registry-username ${{ github.repository_owner }} --registry-password dummy \
