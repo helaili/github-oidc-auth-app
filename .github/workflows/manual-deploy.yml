@@ -51,7 +51,7 @@ jobs:
     steps:
       - name: GetToken
         id: getToken
-        uses: ./
+        uses: helaili/github-oidc-auth@main
         with:
           installationId: ${{ vars.INSTALLATION_ID }}
           endpoint: ${{ vars.ENDPOINT }}
