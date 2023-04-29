@@ -80,7 +80,7 @@ cat private-key.pem | base64
 - You can test the app by hitting the `/ping` endpoint. You should get a `Ok` response.
 
 ## Install the app
-- Install the app on each organisations that will need to be accessed by the workflows. You can do that by following [the instructions](https://docs.github.com/en/apps/maintaining-github-apps/installing-github-apps). Remember to select the repositories that will accessed by the app. 
+- Install the app on each organisations that will need to be accessed by the workflows. You can do that by following [the instructions](https://docs.github.com/en/apps/maintaining-github-apps/installing-github-apps). Remember to select the repositories that will accessed by the app, including the one that will host the `oidc_entitlements.yml` configuration file.
 - Note the installation ID. You can get it by going to the settings of the target org, click `GitHub Apps` in the left menu, then click on the `Configure` button. The installation ID will be in the URL of the page: `https://github.com/organizations/<org name></org>/settings/installations/<installation ID>`
 
 ## Create a configuration file

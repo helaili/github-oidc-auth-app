@@ -190,7 +190,6 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 		log.Printf("no token generated for claims: %v\n", claims)
 	} else {
 		log.Printf("succesfully generated token for claims: %v, with scopes %s\n", claims, scope.String())
-		log.Printf("token: %s", scopedTokenResponse.ScopedToken)
 	}
 
 	// Return the new token to the client
