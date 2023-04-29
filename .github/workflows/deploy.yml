@@ -124,24 +124,31 @@ jobs:
     environment: production
     outputs: 
       installationId: ${{ steps.setenv.outputs.installationId }}
+      environment: ${{ steps.setenv.outputs.environment }}
     steps:
       - name: Set environment variables
         id: setenv
         run: |
           echo "Installation ID: ${{ vars.INSTALLATION_ID }}" 
           echo "installationId=${{ vars.INSTALLATION_ID }}" >> $GITHUB_OUTPUT
+          echo "environment=${{ env.ENVIRONMENT_NAME }}" >> $GITHUB_OUTPUT
   
   deploy:
     name: Deploy
+    needs: 
+      - publish
+      - setenv
+    concurrency:
+      group: ${{ github.workflow }}-${{ needs.setenv.outputs.environment }}
+      cancel-in-progress: true
     uses: ./.github/workflows/deploy-azure-container-app.yml
-    needs: publish
-    secrets: inherit #
+    secrets: inherit 
     permissions:
       id-token: write
       packages: read
       actions: write
     with:
-      environment: production
+      environment: ${{ needs.setenv.outputs.environment }}
   
   test:
     uses: ./.github/workflows/deployment-test.yml
