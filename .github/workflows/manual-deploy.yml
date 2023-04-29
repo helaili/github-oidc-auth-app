@@ -47,7 +47,7 @@ jobs:
     permissions:
       id-token: write
     runs-on: ubuntu-latest
-    environment: production
+    environment: sandbox
     steps:
       - name: GetToken
         id: getToken
