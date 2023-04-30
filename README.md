@@ -179,6 +179,39 @@ should-work-with-action:
 
 # Giving it a try
 
-You might to give this app and action a try without going through the hassle of creating a new GitHub app and deploying it somewhere. Make sense, so I created a sandbox for you. 
+You might to give this app and action a try without going through the hassle of creating a new GitHub app and deploying it somewhere. Make sense, so I created a sandbox for you. This is a sandbox, there is no SLA coming with this and as I am running it, it really means that you are trusting me with your GitHub token. I am not going to do anything bad with it, but you should not use this for anything serious. In order to limit any problem,  no organisation permission are granted to this app instance. The only repository permissions granted are:
+- administration: `read`
+- contents: `write`
+- issues: `write`
+
+In order to use this sandbox, you will need to:
+- Create a file named `oidc_entitlements.yml` in the `.github-private` repository of your organisation as shown above. 
+- Install the app on your organisation by clicking [here](https://github.com/apps/oidc-auth-for-github-sandbox). Make sure you grant the app access to at lest the `.github-private` and whichever other repository you will want to access with the token. Store the installation ID somewhere.
+- Create a workflow that uses the action `helaili/github-oidc-auth` as shown below. 
 
 ```yaml
+...
+    steps:
+      - name: Get the token
+        id: getToken
+        uses: helaili/github-oidc-auth@main
+        with:
+          installationId: < Insert your installation id here >
+          endpoint: https://oidc-auth-app-sandbox.orangefield-2a956808.eastus.azurecontainerapps.io/token
+
+      - name: Use the token from the output
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ steps.getToken.outputs.scopedToken }}
+          script: |
+            github.rest.repos.get({
+              owner: 'my-org',
+              repo: 'my-repo'
+            }).then((response) => {
+              if(!response.data.full_name === 'my-org/my-repo') {
+                // Victory!
+              }
+            }).catch((error) => {
+              core.setFailed(`Failed to access repo. Error was ${error}`);
+            })
+```
