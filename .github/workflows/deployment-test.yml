@@ -11,11 +11,15 @@ on:
         description: 'Endpoint to use'
         type: string
         required: true
+      environment:
+        description: 'Endpoint to use'
+        type: string
+        required: true
   
 jobs:
   should-work-with-curl:
     runs-on: ubuntu-latest
-    environment: production
+    environment:  ${{ inputs.environment }}
     permissions:
       id-token: write
     steps:
@@ -65,7 +69,7 @@ jobs:
 
   should-work-with-action:
     runs-on: ubuntu-latest
-    environment: production
+    environment:  ${{ inputs.environment }}
     permissions:
       id-token: write
     steps:

@@ -160,3 +160,4 @@ jobs:
     with:
       endpoint: ${{ needs.deploy.outputs.endpoint }}
       installationId: ${{ needs.setenv.outputs.installationId }}
+      environment: production

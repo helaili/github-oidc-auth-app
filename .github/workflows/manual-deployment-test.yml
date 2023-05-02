@@ -13,7 +13,7 @@ jobs:
   setenv:
     name: Set environment variables
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
+    environment: ${{ inputs.environment }}
     outputs: 
       endpoint: ${{ steps.setenv.outputs.endpoint }}
       installationId: ${{ steps.setenv.outputs.installationId }}
@@ -35,3 +35,4 @@ jobs:
     with:
       endpoint: ${{ needs.setenv.outputs.endpoint }}
       installationId: ${{ needs.setenv.outputs.installationId }}
+      environment: ${{ inputs.environment }}
