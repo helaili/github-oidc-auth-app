@@ -61,13 +61,13 @@ jobs:
           github-token: ${{ steps.getToken.outputs.scopedToken }}
           script: |
             github.rest.repos.get({
-              owner: 'carbonhub',
-              repo: 'website'
+              owner: '${{ vars.TEST_ORG }}',
+              repo: '${{ vars.TEST_REPO }}'
             }).then((response) => {
               if(!response.data.full_name) {
-                core.setFailed(`Failed to access repo carbonhub/website. Response was ${response}`);
+                core.setFailed(`Failed to access repo ${{ vars.TEST_ORG }}/${{ vars.TEST_REPO }}. Response was ${response}`);
               } else {
-                console.log('Successfully accessed repo carbonhub/website');
+                console.log('Successfully accessed repo ${{ vars.TEST_ORG }}/${{ vars.TEST_REPO }}');
               }
             }).catch((error) => {
               core.setFailed(`Failed to access repo. Error was ${error}`);

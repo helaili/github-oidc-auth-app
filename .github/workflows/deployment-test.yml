@@ -39,13 +39,13 @@ jobs:
           github-token: ${{ env.SCOPED_TOKEN }}
           script: |
             github.rest.repos.get({
-              owner: 'octodemo',
-              repo: 'codespace-oddity'
+              owner: '${{ vars.TEST_ORG }}',
+              repo: '${{ vars.TEST_REPO }}'
             }).then((response) => {
               if(!response.data.full_name) {
-                core.setFailed(`Failed to access repo octodemo/codespace-oddity. Response was ${response}`);
+                core.setFailed(`Failed to access repo ${{ vars.TEST_ORG }}/${{ vars.TEST_REPO }}. Response was ${response}`);
               } else {
-                console.log('Successfully accessed repo octodemo/codespace-oddity');
+                console.log('Successfully accessed repo ${{ vars.TEST_ORG }}/${{ vars.TEST_REPO }}');
               }
             }).catch((error) => {
               core.setFailed(`Failed to access repo. Error was ${error}`);
@@ -81,13 +81,13 @@ jobs:
           github-token: ${{ env.SCOPED_TOKEN }}
           script: |
             github.rest.repos.get({
-              owner: 'octodemo',
-              repo: 'codespace-oddity'
+              owner: '${{ vars.TEST_ORG }}',
+              repo: '${{ vars.TEST_REPO }}'
             }).then((response) => {
               if(!response.data.full_name) {
-                core.setFailed(`Failed to access repo octodemo/codespace-oddity. Response was ${response}`);
+                core.setFailed(`Failed to access repo ${{ vars.TEST_ORG }}/${{ vars.TEST_REPO }}. Response was ${response}`);
               } else {
-                console.log('Successfully accessed repo octodemo/codespace-oddity');
+                console.log('Successfully accessed repo ${{ vars.TEST_ORG }}/${{ vars.TEST_REPO }}');
               }
             }).catch((error) => {
               core.setFailed(`Failed to access repo. Error was ${error}`);
