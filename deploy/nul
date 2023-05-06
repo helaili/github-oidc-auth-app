@@ -1,1 +1,0 @@
-ERROR: (ResourceNotFound) The Resource 'Microsoft.App/managedEnvironments/oidc-auth-sandbox-env' under resource group 'oidc-auth-app' was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix
