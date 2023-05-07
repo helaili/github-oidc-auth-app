@@ -149,11 +149,19 @@ jobs:
       actions: write
     with:
       environment: ${{ needs.setenv.outputs.environment }}
-  
+
+  wakeup:
+    name: Wakeup container app
+    runs-on: ubuntu-latest
+    needs: 
+      - deploy
+    steps: 
+      - run: curl ${{ needs.deploy.outputs.ping }}
+    
   test:
     uses: ./.github/workflows/deployment-test.yml
     needs: 
-      - deploy
+      - wakeup
       - setenv
     permissions:
       id-token: write
