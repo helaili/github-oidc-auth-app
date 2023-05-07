@@ -12,7 +12,7 @@ on:
         type: string
         required: true
       environment:
-        description: 'Endpoint to use'
+        description: 'Environment to use'
         type: string
         required: true
   

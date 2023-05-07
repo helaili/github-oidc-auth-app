@@ -163,6 +163,7 @@ jobs:
     needs: 
       - wakeup
       - setenv
+      - deploy
     permissions:
       id-token: write
     with:
