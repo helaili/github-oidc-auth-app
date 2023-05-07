@@ -11,6 +11,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
@@ -46,8 +47,10 @@ var installationCache = make(map[string]int64)
  * Retrieves the installation id from the login (organization or user)
  */
 func getInstallationID(appTransport *ghinstallation.AppsTransport, login string) (int64, error) {
-	if installationCache[login] != 0 {
-		return installationCache[login], nil
+	upperLogin := strings.ToUpper(login)
+
+	if installationCache[upperLogin] != 0 {
+		return installationCache[upperLogin], nil
 	} else {
 		// Cache miss, retrieve all installations
 		log.Printf("missed cache looking for installation for login %s\n", login)
@@ -66,7 +69,7 @@ func getInstallationID(appTransport *ghinstallation.AppsTransport, login string)
 			}
 
 			for _, installation := range installations {
-				installationCache[installation.Account.GetLogin()] = installation.GetID()
+				installationCache[strings.ToUpper(installation.Account.GetLogin())] = installation.GetID()
 				log.Printf("updating cache for login %s\n", installation.Account.GetLogin())
 			}
 			if response.NextPage == 0 {
@@ -75,7 +78,12 @@ func getInstallationID(appTransport *ghinstallation.AppsTransport, login string)
 			options.Page = response.NextPage
 		}
 	}
-	return installationCache[login], nil
+	installationId := installationCache[upperLogin]
+	if installationId == 0 {
+		return 0, fmt.Errorf("no installation found for login %s", login)
+	} else {
+		return installationId, nil
+	}
 }
 
 /*
