@@ -52,9 +52,9 @@ jobs:
     - name: Create log analytics workspace
       id: create_log_analytics_workspace
       run: |
-      customerId=$(az monitor log-analytics workspace create -g ${{ vars.RESSOURCE_GROUP }} \
+        customerId=$(az monitor log-analytics workspace create -g ${{ vars.RESSOURCE_GROUP }} \
                       -n oidc-auth-logs-${{ inputs.environment }} \
-                      --query id -o tsv)
+                      --query customerId -o tsv)
         echo "customerId=$customerId" >> $GITHUB_OUTPUT 
     
     - name: Get log analytics shared key
