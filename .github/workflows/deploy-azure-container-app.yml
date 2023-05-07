@@ -52,6 +52,7 @@ jobs:
     - name: Create log analytics workspace
       id: create_log_analytics_workspace
       run: |
+        AZURE_CORE_USE_COMMAND_INDEX=False
         workspaceId=$(az monitor log-analytics workspace create -g ${{ vars.RESSOURCE_GROUP }} \
                       -n oidc-auth-logs-${{ inputs.environment }} --location eastus \
                       --query id -o tsv)
