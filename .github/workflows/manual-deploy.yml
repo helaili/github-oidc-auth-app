@@ -15,14 +15,14 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     outputs: 
-      installationId: ${{ steps.setenv.outputs.installationId }}
+      login: ${{ steps.setenv.outputs.login }}
       environment: ${{ steps.setenv.outputs.environment }}
     steps:
       - name: Set environment variables
         id: setenv
         run: |
-          echo "Installation ID: ${{ vars.INSTALLATION_ID }}" 
-          echo "installationId=${{ vars.INSTALLATION_ID }}" >> $GITHUB_OUTPUT
+          echo "Login: ${{ vars.LOGIN }}" 
+          echo "login=${{ vars.LOGIN }}" >> $GITHUB_OUTPUT
   
   deploy:
     name: Deploy
@@ -53,7 +53,7 @@ jobs:
         id: getToken
         uses: helaili/github-oidc-auth@main
         with:
-          installationId: ${{ vars.INSTALLATION_ID }}
+          login: ${{ vars.LOGIN }}
           endpoint: ${{ vars.ENDPOINT }}
       - name: Use the token from the output
         uses: actions/github-script@v6
