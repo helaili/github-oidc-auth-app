@@ -81,7 +81,6 @@ cat private-key.pem | base64
 
 ## Install the app
 - Install the app on each organisations that will need to be accessed by the workflows. You can do that by following [the instructions](https://docs.github.com/en/apps/maintaining-github-apps/installing-github-apps). Remember to select the repositories that will accessed by the app, including the one that will host the `oidc_entitlements.yml` configuration file.
-- Note the installation ID. You can get it by going to the settings of the target org, click `GitHub Apps` in the left menu, then click on the `Configure` button. The installation ID will be in the URL of the page: `https://github.com/organizations/<org name></org>/settings/installations/<installation ID>`
 
 ## Create a configuration file
 - Commit an `oidc_entitlements.yml` file in the `.github-private` repository (or whatever value you provided to the runtime with the  `CONFIG_REPO` and `CONFIG_FILE` environment variables) of each organisation that will need to be accessed by the workflows. The file should look like below. It is a basically an array of claims to match and the permissions to grant if the claim matches. The claims are the ones provided by the OIDC token.
@@ -143,7 +142,7 @@ The list of claims currently supported by this app is currently limited to the l
 - repository_visibility
 - workflow
 
-:rotating_light: **Important**: If you set loose claim filters in your configuration (like just `environment: production`), anyone with one of the installation ID and the URL of the app will be able to generate a token with the matching permission. Using such loose conditions means you need to treat these paramaters as secrets, but I would strongly advise to always include extra information that can not be faked such as the repository owner name.
+:rotating_light: **Important**: If you set loose claim filters in your configuration (like just `environment: production`), anyone with one of the login name and the URL of the app will be able to generate a token with the matching permission. Using such loose conditions means you need to treat these paramaters as secrets, but I would strongly advise to always include extra information that can not be faked such as the repository owner name.
 
 See the the `properties of permissions` section [here](https://docs.github.com/en/enterprise-cloud@latest/rest/apps/apps?apiVersion=2022-11-28#create-a-scoped-access-token) to see the list of permissions and their values.
 
@@ -162,7 +161,7 @@ should-work-with-action:
         id: getToken
         uses: helaili/github-oidc-auth@main
         with:
-          installationId: ${{ vars.installationId }}
+          login: ${{ vars.login }}
           endpoint: ${{ vars.endpoint }}
       - name: Use the token from the environment
         uses: actions/github-script@v6
@@ -186,7 +185,7 @@ You might to give this app and action a try without going through the hassle of 
 
 In order to use this sandbox, you will need to:
 - Create a file named `oidc_entitlements.yml` in the `.github-private` repository of your organisation as previously explained. 
-- Install the app on your organisation by clicking [here](https://github.com/apps/oidc-auth-for-github-sandbox). Make sure you grant the app access to at least the `.github-private` repository and whichever other one within this organisation that you will want to access using the token. Store the installation ID somewhere.
+- Install the app on your organisation by clicking [here](https://github.com/apps/oidc-auth-for-github-sandbox). Make sure you grant the app access to at least the `.github-private` repository and whichever other one within this organisation that you will want to access using the token. 
 - Create a workflow that uses the action `helaili/github-oidc-auth` as shown below. 
 
 ```yaml
@@ -196,7 +195,7 @@ In order to use this sandbox, you will need to:
         id: getToken
         uses: helaili/github-oidc-auth@main
         with:
-          installationId: < Insert your installation id here >
+          login: < organisation or user login which you need access to >
           endpoint: https://oidc-auth-app-sandbox.orangefield-2a956808.eastus.azurecontainerapps.io/token
 
       - name: Use the token from the output
