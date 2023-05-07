@@ -61,7 +61,7 @@ jobs:
     - name: Get log analytics shared key
       id: get_log_analytics_shared_key
       run: |
-        sharedKey=$(az monitor log-analytics workspace get-shared-keys -g ${{ vars.RESSOURCE_GROUP }} \ 
+        sharedKey=$(az monitor log-analytics workspace get-shared-keys -g ${{ vars.RESSOURCE_GROUP }} \
         --workspace-name oidc-auth-logs-${{ inputs.environment }} --query primarySharedKey -o tsv)
         echo "::add-mask::$sharedKey"
         echo "sharedKey=$sharedKey" >> $GITHUB_OUTPUT 
