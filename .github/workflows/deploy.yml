@@ -123,14 +123,14 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     outputs: 
-      installationId: ${{ steps.setenv.outputs.installationId }}
+      login: ${{ steps.setenv.outputs.login }}
       environment: ${{ steps.setenv.outputs.environment }}
     steps:
       - name: Set environment variables
         id: setenv
         run: |
-          echo "Installation ID: ${{ vars.INSTALLATION_ID }}" 
-          echo "installationId=${{ vars.INSTALLATION_ID }}" >> $GITHUB_OUTPUT
+          echo "Installation ID: ${{ vars.LOGIN }}" 
+          echo "login=${{ vars.LOGIN }}" >> $GITHUB_OUTPUT
           echo "environment=${{ env.ENVIRONMENT_NAME }}" >> $GITHUB_OUTPUT
   
   deploy:
@@ -159,5 +159,5 @@ jobs:
       id-token: write
     with:
       endpoint: ${{ needs.deploy.outputs.endpoint }}
-      installationId: ${{ needs.setenv.outputs.installationId }}
+      login: ${{ needs.setenv.outputs.login }}
       environment: production

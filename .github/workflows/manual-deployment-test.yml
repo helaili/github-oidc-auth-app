@@ -16,16 +16,16 @@ jobs:
     environment: ${{ inputs.environment }}
     outputs: 
       endpoint: ${{ steps.setenv.outputs.endpoint }}
-      installationId: ${{ steps.setenv.outputs.installationId }}
+      login: ${{ steps.setenv.outputs.login }}
     steps:
       - name: Set environment variables
         id: setenv
         run: |
           echo "Environment: ${{ inputs.environment }}"
           echo "Endpoint: ${{ vars.ENDPOINT }}"
-          echo "Installation ID: ${{ vars.INSTALLATION_ID }}" 
+          echo "Login: ${{ vars.LOGIN }}" 
           echo "endpoint=${{ vars.ENDPOINT }}" >> $GITHUB_OUTPUT
-          echo "installationId=${{ vars.INSTALLATION_ID }}" >> $GITHUB_OUTPUT
+          echo "login=${{ vars.LOGIN }}" >> $GITHUB_OUTPUT
           
   test:
     uses: ./.github/workflows/deployment-test.yml
@@ -34,5 +34,5 @@ jobs:
       id-token: write
     with:
       endpoint: ${{ needs.setenv.outputs.endpoint }}
-      installationId: ${{ needs.setenv.outputs.installationId }}
+      login: ${{ needs.setenv.outputs.login }}
       environment: ${{ inputs.environment }}

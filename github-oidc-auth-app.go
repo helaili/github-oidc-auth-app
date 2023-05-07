@@ -11,6 +11,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
@@ -29,8 +30,8 @@ type GatewayContext struct {
 }
 
 type ScopedTokenRequest struct {
-	OIDCToken      string `json:"oidcToken"`
-	InstallationId int64  `json:"installationId"`
+	OIDCToken string `json:"oidcToken"`
+	Login     string `json:"login"`
 }
 
 type ScopedTokenResponse struct {
@@ -39,27 +40,58 @@ type ScopedTokenResponse struct {
 	Message        string `json:"message"`
 }
 
-/*
- * Retrieves the login (aka organization name) of the installation with the given id
- */
-func getInstallationLogin(appTransport *ghinstallation.AppsTransport, installationId int64) (string, error) {
-	// TODO: cache this
-	client := github.NewClient(&http.Client{Transport: appTransport})
+// Global array of installations used as a cache
+var installationCache = make(map[string]int64)
 
-	// Retrieve installation
-	installation, _, err := client.Apps.GetInstallation(context.Background(), installationId)
-	if err != nil {
-		return "", err
+/*
+ * Retrieves the installation id from the login (organization or user)
+ */
+func getInstallationID(appTransport *ghinstallation.AppsTransport, login string) (int64, error) {
+	upperLogin := strings.ToUpper(login)
+
+	if installationCache[upperLogin] != 0 {
+		return installationCache[upperLogin], nil
+	} else {
+		// Cache miss, retrieve all installations
+		log.Printf("missed cache looking for installation for login %s\n", login)
+
+		client := github.NewClient(&http.Client{Transport: appTransport})
+		options := &github.ListOptions{
+			PerPage: 100,
+			Page:    1,
+		}
+
+		// Keep retrieving all intstallaions until we reach the last page within the response
+		for {
+			installations, response, err := client.Apps.ListInstallations(context.Background(), options)
+			if err != nil {
+				return 0, err
+			}
+
+			for _, installation := range installations {
+				installationCache[strings.ToUpper(installation.Account.GetLogin())] = installation.GetID()
+				log.Printf("updating cache for login %s\n", installation.Account.GetLogin())
+			}
+			if response.NextPage == 0 {
+				break
+			}
+			options.Page = response.NextPage
+		}
 	}
-	return installation.Account.GetLogin(), nil
+	installationId := installationCache[upperLogin]
+	if installationId == 0 {
+		return 0, fmt.Errorf("no installation found for login %s", login)
+	} else {
+		return installationId, nil
+	}
 }
 
 /*
  * Retrieve the entitlement config for the installation with the organisation that owns the installation.
  * Default to the .github-private repository and oidc_entitlements.yml file
  */
-func getEntitlementConfig(configRepo string, configFile string, installationId int64, appTransport *ghinstallation.AppsTransport) ([]Entitlement, error) {
-	login, err := getInstallationLogin(appTransport, installationId)
+func getEntitlementConfig(configRepo string, configFile string, login string, appTransport *ghinstallation.AppsTransport) ([]Entitlement, error) {
+	installationId, err := getInstallationID(appTransport, login)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +142,12 @@ func computeScopes(claims jwt.MapClaims, entitlementConfig []Entitlement) *Scope
 /*
  * Once the scope has been computed, we can connect to GitHub as an installation and retrieve a scoped token
  */
-func generateScopedToken(scope *Scope, installationId int64, appTransport *ghinstallation.AppsTransport) (ScopedTokenResponse, error) {
+func generateScopedToken(scope *Scope, login string, appTransport *ghinstallation.AppsTransport) (ScopedTokenResponse, error) {
+	installationId, err := getInstallationID(appTransport, login)
+	if err != nil {
+		return ScopedTokenResponse{Message: "no installation found"}, nil
+	}
+
 	if scope == nil || scope.isEmpty() {
 		return ScopedTokenResponse{InstallationId: installationId, Message: "no scope matching these claims"}, nil
 	}
@@ -169,7 +206,7 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 
 	// Token is valid. We now need to generate a new token that is specific to our use case
 	// Retrieve the entitlement config for the installation
-	entitlementConfig, err := getEntitlementConfig(gatewayContext.configRepo, gatewayContext.configFile, scopedTokenRequest.InstallationId, gatewayContext.appTransport)
+	entitlementConfig, err := getEntitlementConfig(gatewayContext.configRepo, gatewayContext.configFile, scopedTokenRequest.Login, gatewayContext.appTransport)
 	if err != nil {
 		log.Println("couldn't get entitlement config", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -179,7 +216,7 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 	// Compute the entitlement for the claim
 	scope := computeScopes(claims, entitlementConfig)
 
-	scopedTokenResponse, err := generateScopedToken(scope, scopedTokenRequest.InstallationId, gatewayContext.appTransport)
+	scopedTokenResponse, err := generateScopedToken(scope, scopedTokenRequest.Login, gatewayContext.appTransport)
 	if err != nil {
 		log.Printf("failed to generate scoped tokens for claims: %v, %s\n", claims, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
