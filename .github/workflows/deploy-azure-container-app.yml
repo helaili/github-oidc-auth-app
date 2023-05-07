@@ -52,10 +52,10 @@ jobs:
     - name: Create log analytics workspace
       id: create_log_analytics_workspace
       run: |
-        workspaceId=$(az monitor log-analytics workspace create -g ${{ vars.RESSOURCE_GROUP }} \
+      customerId=$(az monitor log-analytics workspace create -g ${{ vars.RESSOURCE_GROUP }} \
                       -n oidc-auth-logs-${{ inputs.environment }} \
                       --query id -o tsv)
-        echo "workspaceId=$workspaceId" >> $GITHUB_OUTPUT 
+        echo "customerId=$customerId" >> $GITHUB_OUTPUT 
     
     - name: Get log analytics shared key
       id: get_log_analytics_shared_key
@@ -69,7 +69,7 @@ jobs:
       continue-on-error: true
       run: |
         az containerapp env create -n oidc-auth-${{ inputs.environment }}-env -g ${{ vars.RESSOURCE_GROUP }} \
-          --logs-workspace-id ${{ steps.create_log_analytics_workspace.outputs.workspaceId }} \
+          --logs-workspace-id ${{ steps.create_log_analytics_workspace.outputs.customerId }} \
           --logs-workspace-key ${{ steps.get_log_analytics_shared_key.outputs.sharedKey }} \
           --location eastus
         
