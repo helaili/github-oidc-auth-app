@@ -53,8 +53,7 @@ jobs:
       id: create_log_analytics_workspace
       run: |
         workspaceId=$(az monitor log-analytics workspace create -g ${{ vars.RESSOURCE_GROUP }} \
-                      -n oidc-auth-logs-${{ inputs.environment }} --location eastus \
-                      --no-wait \
+                      -n oidc-auth-logs-${{ inputs.environment }} \
                       --query id -o tsv)
         echo "workspaceId=$workspaceId" >> $GITHUB_OUTPUT 
     
