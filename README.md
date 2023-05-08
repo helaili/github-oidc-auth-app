@@ -196,7 +196,7 @@ In order to use this sandbox, you will need to:
         uses: helaili/github-oidc-auth@main
         with:
           login: < organisation or user login which you need access to >
-          endpoint: https://oidc-auth-app-sandbox.orangefield-2a956808.eastus.azurecontainerapps.io/token
+          endpoint: https://oidc-auth-app-sandbox.whitefield-370b64fc.eastus.azurecontainerapps.io/token
 
       - name: Use the token from the output
         uses: actions/github-script@v6
