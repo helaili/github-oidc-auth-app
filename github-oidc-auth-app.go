@@ -43,6 +43,32 @@ type ScopedTokenResponse struct {
 // Global array of installations used as a cache
 var installationCache = make(map[string]int64)
 
+func loadInstallationIdCache(appTransport *ghinstallation.AppsTransport) error {
+	client := github.NewClient(&http.Client{Transport: appTransport})
+	options := &github.ListOptions{
+		PerPage: 100,
+		Page:    1,
+	}
+
+	// Keep retrieving all intstallaions until we reach the last page within the response
+	for {
+		installations, response, err := client.Apps.ListInstallations(context.Background(), options)
+		if err != nil {
+			return err
+		}
+
+		for _, installation := range installations {
+			installationCache[strings.ToUpper(installation.Account.GetLogin())] = installation.GetID()
+			log.Printf("updating cache for login %s\n", installation.Account.GetLogin())
+		}
+		if response.NextPage == 0 {
+			break
+		}
+		options.Page = response.NextPage
+	}
+	return nil
+}
+
 /*
  * Retrieves the installation id from the login (organization or user)
  */
@@ -55,27 +81,9 @@ func getInstallationID(appTransport *ghinstallation.AppsTransport, login string)
 		// Cache miss, retrieve all installations
 		log.Printf("missed cache looking for installation for login %s\n", login)
 
-		client := github.NewClient(&http.Client{Transport: appTransport})
-		options := &github.ListOptions{
-			PerPage: 100,
-			Page:    1,
-		}
-
-		// Keep retrieving all intstallaions until we reach the last page within the response
-		for {
-			installations, response, err := client.Apps.ListInstallations(context.Background(), options)
-			if err != nil {
-				return 0, err
-			}
-
-			for _, installation := range installations {
-				installationCache[strings.ToUpper(installation.Account.GetLogin())] = installation.GetID()
-				log.Printf("updating cache for login %s\n", installation.Account.GetLogin())
-			}
-			if response.NextPage == 0 {
-				break
-			}
-			options.Page = response.NextPage
+		err := loadInstallationIdCache(appTransport)
+		if err != nil {
+			return 0, err
 		}
 	}
 	installationId := installationCache[upperLogin]
@@ -260,6 +268,9 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to initialize GitHub App transport:", err)
 	}
+
+	fmt.Println("loading installation id cache")
+	loadInstallationIdCache(appTransport)
 
 	fmt.Printf("starting up on port %s\n", port)
 
