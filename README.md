@@ -15,32 +15,43 @@ Now if none of the above solutions fit your needs, this project provides a new a
 # Architecture
 
 ```mermaid 
-graph LR
-  App(GitHub-OIDC-Auth App)
-    
+graph TB
   subgraph Repository in Orgnisation 0
-     Workflow(Workflow)
-    Action(GitHub-OIDC-Auth action)
+    subgraph Workflow
+        direction LR
+        Action(GitHub-OIDC-Auth action)
+        endpoint{{endpoint}}
+        login{{login}}
+        Action --> login
+        Action --> endpoint
+    end
     Workflow-->Action
   end
 
-  subgraph Installation 1 
-    Inst1ID((Inst ID 1))
-    Org1(Organisation 1)
-    ConfigFile1(Configuration file 1)
-    Org1-->ConfigFile1
-  end
+  App(GitHub-OIDC-Auth App)
 
   subgraph Installation 2
-    Inst2ID((Inst ID 2))
     Org2(Organisation 2)
-    ConfigFile2(Configuration file 2)
+    ConfigFile2[[Configuration file 2]]
+    Repo2[(Repositories)]
+    Config2(Org config)
     Org2-->ConfigFile2
+    Org2-->Repo2
+    Org2-->Config2
+  end
+  
+  subgraph Installation 1 
+    Org1(Organisation 1)
+    ConfigFile1[[Configuration file 1]]
+    Repo1[(Repositories)]
+    Config1(Org config)
+    Org1-->ConfigFile1
+    Org1-->Repo1
+    Org1-->Config1
   end
 
-
-  Action -- Request token ==>App
-  App -- Send scoped Token  -->Action
+  Action -- Request token --> App
+  App -- Scoped Token  --> Action
   App-->Org1
   App-->Org2
   
