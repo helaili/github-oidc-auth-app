@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-github/v52/github"
 	"gopkg.in/yaml.v2"
 )

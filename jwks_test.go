@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func TestGetKeyForTokenMaker(t *testing.T) {
