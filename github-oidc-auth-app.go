@@ -208,7 +208,7 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 	claims, err := validateTokenCameFromGitHub(scopedTokenRequest.OIDCToken, gatewayContext)
 	if err != nil {
 		log.Println("couldn't validate OIDC token provenance", err)
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		http.Error(w, "couldn't validate OIDC token provenance", http.StatusUnauthorized)
 		return
 	}
 
@@ -217,7 +217,7 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 	entitlementConfig, err := getEntitlementConfig(gatewayContext.configRepo, gatewayContext.configFile, scopedTokenRequest.Login, gatewayContext.appTransport)
 	if err != nil {
 		log.Println("couldn't get entitlement config", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, "couldn't get entitlement config", http.StatusInternalServerError)
 		return
 	}
 
@@ -270,7 +270,10 @@ func main() {
 	}
 
 	fmt.Println("loading installation id cache")
-	loadInstallationIdCache(appTransport)
+	err = loadInstallationIdCache(appTransport)
+	if err != nil {
+		log.Println("error while loading cache", err)
+	}
 
 	fmt.Printf("starting up on port %s\n", port)
 
