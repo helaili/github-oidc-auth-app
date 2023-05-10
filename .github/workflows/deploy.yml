@@ -14,9 +14,37 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
-  ENVIRONMENT_NAME: production
 
 jobs:
+  setenv:
+    name: Set environment variables
+    runs-on: ubuntu-latest
+    outputs: 
+      environment: ${{ steps.setenv.outputs.environment }}
+    steps:
+      - name: Set environment variables
+        id: setenv
+        run: |
+          if [  ${{ github.event_name }} == "pull_request" ]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          else 
+            echo "environment=production" >> $GITHUB_OUTPUT
+          fi
+  
+  setlogin:
+    name: Set environment variables
+    runs-on: ubuntu-latest
+    needs: setenv
+    environment: ${{ needs.setenv.outputs.environment }}
+    outputs: 
+      login: ${{ steps.setlogin.outputs.login }}
+    steps:
+      - name: Set environment variables
+        id: setlogin
+        run: |
+          echo "Target login: ${{ vars.LOGIN }}" 
+          echo "login=${{ vars.LOGIN }}" >> $GITHUB_OUTPUT
+          
   build:
     name: Build and test
     runs-on: ubuntu-latest
@@ -118,21 +146,6 @@ jobs:
         # against the sigstore community Fulcio instance.
         run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
 
-  setenv:
-    name: Set environment variables
-    runs-on: ubuntu-latest
-    environment: production
-    outputs: 
-      login: ${{ steps.setenv.outputs.login }}
-      environment: ${{ steps.setenv.outputs.environment }}
-    steps:
-      - name: Set environment variables
-        id: setenv
-        run: |
-          echo "Installation ID: ${{ vars.LOGIN }}" 
-          echo "login=${{ vars.LOGIN }}" >> $GITHUB_OUTPUT
-          echo "environment=${{ env.ENVIRONMENT_NAME }}" >> $GITHUB_OUTPUT
-  
   deploy:
     name: Deploy
     needs: 
@@ -163,10 +176,11 @@ jobs:
     needs: 
       - wakeup
       - setenv
+      - setlogin
       - deploy
     permissions:
       id-token: write
     with:
       endpoint: ${{ needs.deploy.outputs.endpoint }}
-      login: ${{ needs.setenv.outputs.login }}
-      environment: production
+      login: ${{ needs.setlogin.outputs.login }}
+      environment: ${{ needs.setenv.outputs.environment }}
