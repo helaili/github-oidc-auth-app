@@ -228,3 +228,7 @@ In order to use this sandbox, you will need to:
               core.setFailed(`Failed to access repo. Error was ${error}`);
             })
 ```
+
+# Credits
+
+This app shamelessly reuses code from https://github.com/github/actions-oidc-gateway-example. Thanks to @steiza for the inspiration!
