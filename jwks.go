@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/big"
 	"net/http"
 	"time"
@@ -92,8 +91,7 @@ func validateTokenCameFromGitHub(oidcTokenString string, gc *GatewayContext) (jw
 
 	oidcToken, err := jwt.Parse(string(oidcTokenString), getKeyFromJwks(gc.jwksCache))
 	if err != nil || !oidcToken.Valid {
-		log.Println(err)
-		return nil, fmt.Errorf("unable to validate JWT")
+		return nil, err
 	}
 
 	claims, ok := oidcToken.Claims.(jwt.MapClaims)

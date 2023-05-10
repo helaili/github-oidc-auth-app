@@ -207,7 +207,7 @@ func (gatewayContext *GatewayContext) ServeHTTP(w http.ResponseWriter, req *http
 	// Check that the OIDC token verifies as a valid token from GitHub
 	claims, err := validateTokenCameFromGitHub(scopedTokenRequest.OIDCToken, gatewayContext)
 	if err != nil {
-		log.Println("couldn't validate OIDC token provenance", err)
+		log.Println("couldn't validate OIDC token provenance:", err)
 		http.Error(w, "couldn't validate OIDC token provenance", http.StatusUnauthorized)
 		return
 	}
