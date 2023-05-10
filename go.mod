@@ -25,6 +25,7 @@ require (
 require (
 	github.com/bradleyfalzon/ghinstallation v1.1.1
 	github.com/bradleyfalzon/ghinstallation/v2 v2.3.0
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/joho/godotenv v1.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0

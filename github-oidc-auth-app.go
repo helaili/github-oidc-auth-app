@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-github/v52/github"
 	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v2"
