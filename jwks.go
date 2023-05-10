@@ -88,9 +88,15 @@ func validateTokenCameFromGitHub(oidcTokenString string, gc *GatewayContext) (jw
 	}
 
 	// Attempt to validate JWT with JWKS
+
 	oidcToken, err := jwt.Parse(string(oidcTokenString), getKeyFromJwks(gc.jwksCache))
 	if err != nil || !oidcToken.Valid {
 		fmt.Println(err)
+		if oidcToken != nil {
+			fmt.Println("Now is:", now)
+			fmt.Println("Headers:", oidcToken.Header)
+			fmt.Println("Token string:", oidcTokenString)
+		}
 		return nil, fmt.Errorf("unable to validate JWT")
 	}
 
