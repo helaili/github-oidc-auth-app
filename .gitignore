@@ -1,5 +1,4 @@
-create-azure-fed-creds-sandbox.sh
-create-azure-fed-creds-production.sh
+create-azure-fed-creds-*.sh
 github-oidc-auth-app
 .env*
 !.env.sample
