@@ -146,13 +146,30 @@ Remember that the app you created needs to have the permissions of all the diffe
 
 The list of claims currently supported by this app is currently limited to the list below. See the [GitHub documentation](https://docs.github.com/en/enterprise-cloud@latest/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#configuring-the-oidc-trust-with-the-cloud) for more details about the meaning of these claims.
 - actor
+- actor_id
+- aud
+- base_ref
 - environment
 - event_name
+- head_ref
+- job_workflow_ref
+- job_workflow_sha
 - ref
+- ref_type
 - repository
+- repository_id
 - repository_owner
+- repository_owner_id
 - repository_visibility
+- run_id
+- run_number
+- run_attempt
+- runner_environment
+- sub
 - workflow
+- workflow_ref
+- workflow_sha
+
 
 :rotating_light: **Important**: If you set loose claim filters in your configuration (like just `environment: production`), anyone with one of the login name and the URL of the app will be able to generate a token with the matching permission. Using such loose conditions means you need to treat these paramaters as secrets, but I would strongly advise to always include extra information that can not be faked such as the repository owner name.
 

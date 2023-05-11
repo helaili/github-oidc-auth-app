@@ -127,18 +127,35 @@ func TestValidateTokenCameFromGitHub(t *testing.T) {
 func TestStringifyCompleteMapClaims(t *testing.T) {
 	claims := jwt.MapClaims{
 		"actor":                 "helaili",
+		"actor_id":              2787414,
+		"aud":                   "api://ActionsOIDCGateway",
+		"base_ref":              "refs/heads/main",
 		"environment":           "production",
 		"event_name":            "workflow_dispatch",
+		"head_ref":              "refs/heads/main",
+		"iss":                   "https://token.actions.githubusercontent.com",
+		"job_workflow_ref":      "helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main",
+		"job_workflow_sha":      "44216e5ae99f3653290b60b7f995bfe1c0f3aba0",
 		"ref":                   "refs/heads/main",
+		"ref_type":              "branch",
 		"repository":            "helaili/github-oidc-auth-app",
+		"repository_id":         630836305,
 		"repository_owner":      "helaili",
+		"repository_owner_id":   2787414,
 		"repository_visibility": "public",
+		"run_attempt":           1,
+		"run_id":                4779904167,
+		"run_number":            12,
+		"runner_environment":    "github-hosted",
+		"sub":                   "repo:helaili/github-oidc-auth-app:ref:refs/heads/main",
 		"workflow":              "Manual Test Workflow",
+		"workflow_ref":          "helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main",
+		"workflow_sha":          "44216e5ae99f3653290b60b7f995bfe1c0f3aba0",
 	}
 
 	strMapClaims := stringifyMapClaims(claims)
-	if strMapClaims != "actor:helaili,environment:production,event_name:workflow_dispatch,ref:refs/heads/main,repository:helaili/github-oidc-auth-app,repository_owner:helaili,repository_visibility:public,workflow:Manual Test Workflow" {
-		t.Error("Expected stringified map claims to be actor:helaili,environment:production,event_name:workflow_dispatch,ref:refs/heads/main,repository:helaili/github-oidc-auth-app,repository_owner:helaili,repository_visibility:public,workflow:Manual Test Workflow, but got", strMapClaims)
+	if strMapClaims != "actor:helaili,actor_id:2787414,aud:api://ActionsOIDCGateway,base_ref:refs/heads/main,environment:production,event_name:workflow_dispatch,head_ref:refs/heads/main,iss:https://token.actions.githubusercontent.com,job_workflow_ref:helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main,job_workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0,ref:refs/heads/main,ref_type:branch,repository:helaili/github-oidc-auth-app,repository_id:630836305,repository_owner:helaili,repository_owner_id:2787414,repository_visibility:public,run_attempt:1,run_id:4779904167,run_number:12,runner_environment:github-hosted,sub:repo:helaili/github-oidc-auth-app:ref:refs/heads/main,workflow:Manual Test Workflow,workflow_ref:helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main,workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0" {
+		t.Error("Expected stringified map claims to be actor:helaili,actor_id:2787414,aud:api://ActionsOIDCGateway,base_ref:refs/heads/main,environment:production,event_name:workflow_dispatch,head_ref:refs/heads/main,iss:https://token.actions.githubusercontent.com,job_workflow_ref:helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main,job_workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0,ref:refs/heads/main,ref_type:branch,repository:helaili/github-oidc-auth-app,repository_id:630836305,repository_owner:helaili,repository_owner_id:2787414,repository_visibility:public,run_attempt:1,run_id:4779904167,run_number:12,runner_environment:github-hosted,sub:repo:helaili/github-oidc-auth-app:ref:refs/heads/main,workflow:Manual Test Workflow,workflow_ref:helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main,workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0, but got", strMapClaims)
 	}
 }
 
@@ -154,7 +171,7 @@ func TestStringifyPartialMapClaims(t *testing.T) {
 	}
 
 	strMapClaims := stringifyMapClaims(claims)
-	if strMapClaims != "actor:helaili,environment:XXXNOTSETXXX,event_name:workflow_dispatch,ref:refs/heads/main,repository:helaili/github-oidc-auth-app,repository_owner:helaili,repository_visibility:public,workflow:Manual Test Workflow" {
-		t.Error("Expected stringified map claims to be actor:helaili,environment:XXXNOTSETXXX,event_name:workflow_dispatch,ref:refs/heads/main,repository:helaili/github-oidc-auth-app,repository_owner:helaili,repository_visibility:public,workflow:Manual Test Workflow, but got", strMapClaims)
+	if strMapClaims != "actor:helaili,actor_id:XXXNOTSETXXX,aud:XXXNOTSETXXX,base_ref:XXXNOTSETXXX,environment:XXXNOTSETXXX,event_name:workflow_dispatch,head_ref:XXXNOTSETXXX,iss:XXXNOTSETXXX,job_workflow_ref:XXXNOTSETXXX,job_workflow_sha:XXXNOTSETXXX,ref:refs/heads/main,ref_type:XXXNOTSETXXX,repository:helaili/github-oidc-auth-app,repository_id:XXXNOTSETXXX,repository_owner:helaili,repository_owner_id:XXXNOTSETXXX,repository_visibility:public,run_attempt:XXXNOTSETXXX,run_id:XXXNOTSETXXX,run_number:XXXNOTSETXXX,runner_environment:XXXNOTSETXXX,sub:XXXNOTSETXXX,workflow:Manual Test Workflow,workflow_ref:XXXNOTSETXXX,workflow_sha:XXXNOTSETXXX" {
+		t.Error("Expected stringified map claims to be actor:helaili,actor_id:XXXNOTSETXXX,aud:XXXNOTSETXXX,base_ref:XXXNOTSETXXX,environment:XXXNOTSETXXX,event_name:workflow_dispatch,head_ref:XXXNOTSETXXX,iss:XXXNOTSETXXX,job_workflow_ref:XXXNOTSETXXX,job_workflow_sha:XXXNOTSETXXX,ref:refs/heads/main,ref_type:XXXNOTSETXXX,repository:helaili/github-oidc-auth-app,repository_id:XXXNOTSETXXX,repository_owner:helaili,repository_owner_id:XXXNOTSETXXX,repository_visibility:public,run_attempt:XXXNOTSETXXX,run_id:XXXNOTSETXXX,run_number:XXXNOTSETXXX,runner_environment:XXXNOTSETXXX,sub:XXXNOTSETXXX,workflow:Manual Test Workflow,workflow_ref:XXXNOTSETXXX,workflow_sha:XXXNOTSETXXX, but got", strMapClaims)
 	}
 }
