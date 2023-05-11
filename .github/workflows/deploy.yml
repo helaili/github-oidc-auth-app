@@ -59,12 +59,23 @@ jobs:
         with:
           go-version: 1.20.4
           cache: true
-  
+      
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: go
+          
       - name: Build
         run: go build -v ./...
   
       - name: Test
         run: go test -v ./...
+          
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:go"
+
   
   publish:
     name: Publish to GitHub Container Registry
