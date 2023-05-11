@@ -104,13 +104,30 @@ func validateTokenCameFromGitHub(oidcTokenString string, gc *GatewayContext) (jw
 
 func stringifyMapClaims(claims jwt.MapClaims) string {
 	return "actor:" + claimFieldValue(claims["actor"]) +
+		",actor_id:" + claimFieldValue(claims["actor_id"]) +
+		",aud:" + claimFieldValue(claims["aud"]) +
+		",base_ref:" + claimFieldValue(claims["base_ref"]) +
 		",environment:" + claimFieldValue(claims["environment"]) +
 		",event_name:" + claimFieldValue(claims["event_name"]) +
+		",head_ref:" + claimFieldValue(claims["head_ref"]) +
+		",iss:" + claimFieldValue(claims["iss"]) +
+		",job_workflow_ref:" + claimFieldValue(claims["job_workflow_ref"]) +
+		",job_workflow_sha:" + claimFieldValue(claims["job_workflow_sha"]) +
 		",ref:" + claimFieldValue(claims["ref"]) +
+		",ref_type:" + claimFieldValue(claims["ref_type"]) +
 		",repository:" + claimFieldValue(claims["repository"]) +
+		",repository_id:" + claimFieldValue(claims["repository_id"]) +
 		",repository_owner:" + claimFieldValue(claims["repository_owner"]) +
+		",repository_owner_id:" + claimFieldValue(claims["repository_owner_id"]) +
 		",repository_visibility:" + claimFieldValue(claims["repository_visibility"]) +
-		",workflow:" + claimFieldValue(claims["workflow"])
+		",run_attempt:" + claimFieldValue(claims["run_attempt"]) +
+		",run_id:" + claimFieldValue(claims["run_id"]) +
+		",run_number:" + claimFieldValue(claims["run_number"]) +
+		",runner_environment:" + claimFieldValue(claims["runner_environment"]) +
+		",sub:" + claimFieldValue(claims["sub"]) +
+		",workflow:" + claimFieldValue(claims["workflow"]) +
+		",workflow_ref:" + claimFieldValue(claims["workflow_ref"]) +
+		",workflow_sha:" + claimFieldValue(claims["workflow_sha"])
 }
 
 func claimFieldValue(value interface{}) string {
