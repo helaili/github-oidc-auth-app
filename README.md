@@ -72,6 +72,8 @@ Those are the environment variables that can be used to configure the app:
 
 `CONFIG_FILE`: **Optional**. The name of the configuration file. Default to `oidc_entitlements.yml`
 
+`GHES_URL`: **Optional**. The URL of the GitHub Enterprise Server in the form of `https://ghes.example.com`. If not provided, the app will use `https://github.com`.
+
 # Installation
 
 ## Create a GitHub App 

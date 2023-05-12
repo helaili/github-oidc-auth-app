@@ -71,7 +71,7 @@ func validateTokenCameFromGitHub(oidcTokenString string, gc *GatewayContext) (jw
 	now := time.Now()
 
 	if now.Sub(gc.jwksLastUpdate) > time.Minute || len(gc.jwksCache) == 0 {
-		resp, err := http.Get("https://token.actions.githubusercontent.com/.well-known/jwks")
+		resp, err := http.Get(gc.wellKnownURL)
 		if err != nil {
 			fmt.Println(err)
 			return nil, fmt.Errorf("unable to get JWKS configuration")
