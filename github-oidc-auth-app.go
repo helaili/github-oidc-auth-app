@@ -27,6 +27,7 @@ type GatewayContext struct {
 	appTransport   *ghinstallation.AppsTransport
 	configRepo     string
 	configFile     string
+	wellKnownURL   string
 }
 
 type ScopedTokenRequest struct {
@@ -256,7 +257,9 @@ func main() {
 	if err != nil {
 		log.Fatal("Wrong format for APP_ID")
 	}
-	var configRepo, configFile string
+
+	var configRepo, configFile, wellKnownURL string
+
 	if configRepo = os.Getenv("CONFIG_REPO"); configRepo == "" {
 		configRepo = ".github-private"
 	}
@@ -267,6 +270,13 @@ func main() {
 	appTransport, err := ghinstallation.NewAppsTransport(http.DefaultTransport, app_id, private_key)
 	if err != nil {
 		log.Fatal("Failed to initialize GitHub App transport:", err)
+	}
+
+	if ghesUrl := os.Getenv("GHES_URL"); ghesUrl != "" {
+		appTransport.BaseURL = fmt.Sprintf("%s/api/v3", ghesUrl)
+		wellKnownURL = fmt.Sprintf("%s/_services/token/.well-known/jwks", ghesUrl)
+	} else {
+		wellKnownURL = "https://token.actions.githubusercontent.com/.well-known/jwks"
 	}
 
 	fmt.Println("loading installation id cache")
@@ -282,6 +292,7 @@ func main() {
 		appTransport:   appTransport,
 		configRepo:     configRepo,
 		configFile:     configFile,
+		wellKnownURL:   wellKnownURL,
 	}
 
 	server := http.Server{
