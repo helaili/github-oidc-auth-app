@@ -66,12 +66,12 @@ func getKeyFromJwks(jwksBytes []byte) func(*jwt.Token) (interface{}, error) {
 	}
 }
 
-func validateTokenCameFromGitHub(oidcTokenString string, gc *GatewayContext) (jwt.MapClaims, error) {
+func validateTokenCameFromGitHub(oidcTokenString string, appCtxt *AppContext) (jwt.MapClaims, error) {
 	// Check if we have a recently cached JWKS
 	now := time.Now()
 
-	if now.Sub(gc.jwksLastUpdate) > time.Minute || len(gc.jwksCache) == 0 {
-		resp, err := http.Get(gc.wellKnownURL)
+	if now.Sub(appCtxt.jwksLastUpdate) > time.Minute || len(appCtxt.jwksCache) == 0 {
+		resp, err := http.Get(appCtxt.wellKnownURL)
 		if err != nil {
 			fmt.Println(err)
 			return nil, fmt.Errorf("unable to get JWKS configuration")
@@ -83,13 +83,13 @@ func validateTokenCameFromGitHub(oidcTokenString string, gc *GatewayContext) (jw
 			return nil, fmt.Errorf("unable to get JWKS configuration")
 		}
 
-		gc.jwksCache = jwksBytes
-		gc.jwksLastUpdate = now
+		appCtxt.jwksCache = jwksBytes
+		appCtxt.jwksLastUpdate = now
 	}
 
 	// Attempt to validate JWT with JWKS
 
-	oidcToken, err := jwt.Parse(string(oidcTokenString), getKeyFromJwks(gc.jwksCache))
+	oidcToken, err := jwt.Parse(string(oidcTokenString), getKeyFromJwks(appCtxt.jwksCache))
 	if err != nil || !oidcToken.Valid {
 		return nil, err
 	}

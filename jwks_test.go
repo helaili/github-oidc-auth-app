@@ -75,7 +75,7 @@ func TestValidateTokenCameFromGitHub(t *testing.T) {
 	jwks := JWKS{Keys: []JWK{jwk}}
 	jwksBytes, _ := json.Marshal(jwks)
 
-	gatewayContext := &GatewayContext{jwksCache: jwksBytes, jwksLastUpdate: time.Now()}
+	gatewayContext := &AppContext{jwksCache: jwksBytes, jwksLastUpdate: time.Now()}
 
 	// Test token signed in the expected way
 	tokenClaims := jwt.MapClaims{"for": "testing"}
