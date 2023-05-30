@@ -4,10 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
@@ -21,8 +20,8 @@ type AppContext struct {
 	configFile        string
 	wellKnownURL      string
 	jwksCache         []byte
-	installationCache map[string]int64
-	configCache       map[string]*EntitlementConfig
+	installationCache *InstallationCache
+	configCache       *ConfigCache
 }
 
 type ScopedTokenRequest struct {
@@ -38,8 +37,8 @@ type ScopedTokenResponse struct {
 
 func NewAppContext(jwksLastUpdate time.Time, appTransport *ghinstallation.AppsTransport,
 	configRepo string, configFile string, wellKnownURL string) *AppContext {
-	installationCache := make(map[string]int64)
-	configCache := make(map[string]*EntitlementConfig)
+	installationCache := NewInstallationCache()
+	configCache := NewConfigCache()
 
 	return &AppContext{
 		jwksLastUpdate, appTransport,
@@ -62,29 +61,30 @@ func (appContext *AppContext) loadConfigs() error {
 		}
 
 		for _, installation := range installations {
-			config := NewEntitlementConfig(
-				installation.Account.GetLogin(),
-				installation.GetID(),
-				appContext.configRepo,
-				appContext.configFile,
-			)
-
-			err := config.load(appContext.appTransport)
-			if err != nil {
-				// Shall we do something with this error besides logging it? As it is, the entry is in the cache so
-				// we don't try to reload a faulty configuration for each call. Users will not get a token
-				log.Printf("failed to load config for installation %d on org %s with error %s\n",
-					installation.GetID(), installation.Account.GetLogin(), err)
-			}
-
-			appContext.configCache[strings.ToUpper(installation.Account.GetLogin())] = config
-			log.Printf("updating config cache for login %s\n", installation.Account.GetLogin())
+			appContext.loadConfig(installation.Account.GetLogin(), installation.GetID())
 		}
 		if response.NextPage == 0 {
 			break
 		}
 		options.Page = response.NextPage
 	}
+	return nil
+}
+
+func (appContext *AppContext) loadConfig(login string, installationId int64) error {
+	config := NewEntitlementConfig(login, installationId, appContext.configRepo, appContext.configFile)
+
+	err := config.load(appContext.appTransport)
+	if err != nil {
+		// Shall we do something with this error besides logging it? As it is, the entry is in the cache so
+		// we don't try to reload a faulty configuration for each call. Users will not get a token
+		log.Printf("failed to load config for installation %d on org %s with error %s\n",
+			installationId, login, err)
+	}
+
+	appContext.configCache.SetConfig(login, config)
+	log.Printf("updating config cache for login %s\n", login)
+
 	return nil
 }
 
@@ -103,8 +103,8 @@ func (appContext *AppContext) loadInstallationIdCache() error {
 		}
 
 		for _, installation := range installations {
-			appContext.installationCache[strings.ToUpper(installation.Account.GetLogin())] = installation.GetID()
-			log.Printf("updating cache for login %s\n", installation.Account.GetLogin())
+			appContext.installationCache.SetInstallationId(installation.Account.GetLogin(), installation.GetID())
+			log.Printf("updating installation cache for login %s\n", installation.Account.GetLogin())
 		}
 		if response.NextPage == 0 {
 			break
@@ -118,10 +118,8 @@ func (appContext *AppContext) loadInstallationIdCache() error {
  * Retrieves the installation id from the login (organization or user)
  */
 func (appContext *AppContext) getInstallationID(login string) (int64, error) {
-	upperLogin := strings.ToUpper(login)
-
-	if appContext.installationCache[upperLogin] != 0 {
-		return appContext.installationCache[upperLogin], nil
+	if appContext.installationCache.GetInstallationId(login) != 0 {
+		return appContext.installationCache.GetInstallationId(login), nil
 	} else {
 		// Cache miss, retrieve all installations
 		log.Printf("missed cache looking for installation for login %s\n", login)
@@ -131,7 +129,7 @@ func (appContext *AppContext) getInstallationID(login string) (int64, error) {
 			return 0, err
 		}
 	}
-	installationId := appContext.installationCache[upperLogin]
+	installationId := appContext.installationCache.GetInstallationId(login)
 	if installationId == 0 {
 		return 0, fmt.Errorf("no installation found for login %s", login)
 	} else {
@@ -166,7 +164,7 @@ func (appContext *AppContext) generateScopedToken(scope *Scope, login string) (S
 func (appContext *AppContext) handleTokenRequest(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 
-	body, err := ioutil.ReadAll(req.Body)
+	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
 		return
@@ -188,7 +186,7 @@ func (appContext *AppContext) handleTokenRequest(w http.ResponseWriter, req *htt
 	}
 
 	// Token is valid. We now need to generate a new token that is specific to our use case
-	config := appContext.configCache[strings.ToUpper(scopedTokenRequest.Login)]
+	config := appContext.configCache.GetConfig(scopedTokenRequest.Login)
 	if config == nil {
 		msg := fmt.Sprintf("no configuration found in cache for %s", scopedTokenRequest.Login)
 		log.Println(msg)
@@ -217,6 +215,55 @@ func (appContext *AppContext) handleTokenRequest(w http.ResponseWriter, req *htt
 }
 
 /*
+ * This function is called when a push event is received from GitHub.
+ * It might mean the configuration has changed and need to be reloaded.
+ */
+func (appContext *AppContext) processPushEvent(event github.PushEvent) {
+	log.Println("potential config changed detected")
+	if appContext.checkConfigChange(event) {
+		log.Printf("reloading config for organization %s\n", event.GetRepo().GetOwner().GetLogin())
+		appContext.loadConfig(event.GetRepo().GetOwner().GetLogin(), event.Installation.GetID())
+	}
+}
+
+/*
+ * Checking if the configuration has changed
+ */
+func (appContext *AppContext) checkConfigChange(event github.PushEvent) bool {
+	// Check if the push event is for the main or master branch.
+	// We are not at this time trying to figure out what the default branch is
+	branch := event.GetRef()
+	if branch != "refs/heads/main" && branch != "refs/heads/master" {
+		return false
+	}
+
+	// Check if the push event is for the config repo
+	if appContext.configRepo == event.GetRepo().GetName() {
+		if appContext.configFile != "" {
+			// Config is single file based.
+			// Check if the config file is part of one of the commits within this push event
+			for _, commit := range event.Commits {
+				var fileArrays = [][]string{commit.Added, commit.Removed, commit.Modified}
+				for _, files := range fileArrays {
+					for _, file := range files {
+						if file == appContext.configFile {
+							return true
+						}
+					}
+				}
+			}
+		} else {
+			// Config is repo based, so we need to reload the config regardless of the files that were pushed
+			return true
+		}
+	}
+	return false
+}
+
+func (appContext *AppContext) processInstallationEvent(event github.InstallationEvent) {
+}
+
+/*
  * Handle http requests
  */
 func (appContext *AppContext) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -230,6 +277,27 @@ func (appContext *AppContext) ServeHTTP(w http.ResponseWriter, req *http.Request
 	}
 
 	if req.Method == http.MethodPost && req.RequestURI == "/webhook" {
+		payload, err := github.ValidatePayload(req, nil)
+		if err != nil {
+			log.Println("failed to validate webhook payload:", err)
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+		event, err := github.ParseWebHook(github.WebHookType(req), payload)
+		if err != nil {
+			log.Println("failed to parse webhook payload:", err)
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+		switch event := event.(type) {
+		case *github.PushEvent:
+			appContext.processPushEvent(*event)
+			return
+		case *github.InstallationEvent:
+			appContext.processInstallationEvent(*event)
+			return
+		}
+
 		defer req.Body.Close()
 		fmt.Println("webhook received")
 		w.Header().Set("Content-Type", "text/plain")

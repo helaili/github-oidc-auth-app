@@ -27,7 +27,6 @@ func NewEntitlementConfig(Login string, InstallationId int64, Repo, File string)
 
 func (config *EntitlementConfig) load(appTransport *ghinstallation.AppsTransport) error {
 	log.Printf("loading config for org %s\n", config.Login)
-	log.Printf("Currently %d entitlements for org %s", len(config.Entitlements), config.Login)
 	itr := ghinstallation.NewFromAppsTransport(appTransport, config.InstallationId)
 	// Use installation transport with github.com/google/go-github
 	client := github.NewClient(&http.Client{Transport: itr})
