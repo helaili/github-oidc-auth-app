@@ -94,14 +94,18 @@ func TestComputeSimpleEntitlements(t *testing.T) {
 	}
 
 	content := string(b)
-	var entitlementConfig []Entitlement
-	err = yaml.Unmarshal([]byte(content), &entitlementConfig)
+	var entitlements []Entitlement
+	err = yaml.Unmarshal([]byte(content), &entitlements)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	entitlementConfig := &EntitlementConfig{
+		Entitlements: entitlements,
+	}
+
 	// Compute the scope for the claims
-	scope := computeScopes(claims, entitlementConfig)
+	scope := entitlementConfig.computeScopes(claims)
 	expectedRepoList := []string{"codespace-oddity"}
 	read := "read"
 	expectedPermissions := github.InstallationPermissions{
@@ -124,10 +128,14 @@ func TestComputeMultipleEntitlements(t *testing.T) {
 	}
 
 	content := string(b) // convert content to a 'string'
-	var entitlementConfig []Entitlement
-	err = yaml.Unmarshal([]byte(content), &entitlementConfig)
+	var entitlements []Entitlement
+	err = yaml.Unmarshal([]byte(content), &entitlements)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	entitlementConfig := &EntitlementConfig{
+		Entitlements: entitlements,
 	}
 
 	expectedRepoList := []string{"codespace-oddity", "bootstrap"}
@@ -139,7 +147,7 @@ func TestComputeMultipleEntitlements(t *testing.T) {
 	}
 
 	// Compute the scope for the claims
-	scope := computeScopes(claims, entitlementConfig)
+	scope := entitlementConfig.computeScopes(claims)
 	if !reflect.DeepEqual(scope.Repositories, expectedRepoList) {
 		t.Error("Expected scope.Repositories to be [codespace-oddity, bootstrap], but got", scope.Repositories)
 	}
@@ -156,14 +164,18 @@ func TestNoEntitlements(t *testing.T) {
 	}
 
 	content := string(b)
-	var entitlementConfig []Entitlement
-	err = yaml.Unmarshal([]byte(content), &entitlementConfig)
+	var entitlements []Entitlement
+	err = yaml.Unmarshal([]byte(content), &entitlements)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	entitlementConfig := &EntitlementConfig{
+		Entitlements: entitlements,
+	}
+
 	// Compute the scope for the claims
-	scope := computeScopes(claims, entitlementConfig)
+	scope := entitlementConfig.computeScopes(claims)
 	expectedRepoList := []string{}
 	expectedPermissions := github.InstallationPermissions{}
 
