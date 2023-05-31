@@ -25,3 +25,9 @@ func (configCache *ConfigCache) SetConfig(login string, config *EntitlementConfi
 	defer configCache.mu.Unlock()
 	configCache.cache[strings.ToUpper(login)] = config
 }
+
+func (configCache *ConfigCache) DeleteConfig(login string) {
+	configCache.mu.Lock()
+	defer configCache.mu.Unlock()
+	delete(configCache.cache, strings.ToUpper(login))
+}

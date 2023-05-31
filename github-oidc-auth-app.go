@@ -50,12 +50,6 @@ func main() {
 
 	appContext := NewAppContext(time.Now(), appTransport, configRepo, configFile, wellKnownURL)
 
-	fmt.Println("loading installation id cache")
-	err = appContext.loadInstallationIdCache()
-	if err != nil {
-		log.Println("error while loading cache", err)
-	}
-
 	fmt.Println("loading config cache")
 	err = appContext.loadConfigs()
 	if err != nil {
