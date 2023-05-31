@@ -1,4 +1,5 @@
 [![Publish and Deploy](https://github.com/helaili/github-oidc-auth-app/actions/workflows/deploy.yml/badge.svg)](https://github.com/helaili/github-oidc-auth-app/actions/workflows/deploy.yml)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/helaili/github-oidc-auth-app?label=latest&logo=docker)
 
 # github-oidc-auth-app
 
