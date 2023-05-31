@@ -79,7 +79,8 @@ Those are the environment variables that can be used to configure the app:
 ## Create a GitHub App 
 Follow [the instructions](https://docs.github.com/en/apps/creating-github-apps/setting-up-a-github-app/creating-a-github-app) to create the GitHub App. Couple things to keep in mind while creating this app:
 - You need to set permissions for this app. This permissions need to be the sum of permissions of all the scoped tokens you intend to generate. You might have to review this list of permissions if you want to add a new scope later on.
-- There is no need to set a webhook, a setup URL or a callback URL. You have to provide a homepage URL, but it can be anything as it will not be used.
+- The webhook URL should be `https://<your url>/webhook`. 
+- There is no need to set a setup URL or a callback URL. You have to provide a homepage URL, but it can be anything as it will not be used.
 - If you are going to use this app beyond the organisation or account that owns the app, make sure to select the `Any account` option in the `Where can this GitHub App be installed?` section. In other words, if you are going to use the app to grant access to a repository in another organisation than the owner of the app, you need to select `Any account` and not `Only on this account`.
 - Note the `App ID` of the app, you will need to provide later as an environment variable to the app runtime.
 - Once the application created, generate a private key for this app. You can do that in the `General` section of the app settings. This key is highly confidential and will be provided as a base64 encoded string as an environment variable to the app runtime. You can use the following command to generate the base64 encoded string of the private key:
