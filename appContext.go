@@ -61,7 +61,10 @@ func (appContext *AppContext) loadConfigs() error {
 		}
 
 		for _, installation := range installations {
-			appContext.loadConfig(installation.Account.GetLogin(), installation.GetID())
+			if installation.GetSuspendedBy() == nil {
+				appContext.loadConfig(installation.Account.GetLogin(), installation.GetID())
+				appContext.installationCache.SetInstallationId(installation.Account.GetLogin(), installation.GetID())
+			}
 		}
 		if response.NextPage == 0 {
 			break
@@ -78,8 +81,7 @@ func (appContext *AppContext) loadConfig(login string, installationId int64) err
 	if err != nil {
 		// Shall we do something with this error besides logging it? As it is, the entry is in the cache so
 		// we don't try to reload a faulty configuration for each call. Users will not get a token
-		log.Printf("failed to load config for installation %d on org %s with error %s\n",
-			installationId, login, err)
+		log.Printf("failed to load config for installation %d on org %s with error %s\n", installationId, login, err)
 	}
 
 	appContext.configCache.SetConfig(login, config)
@@ -88,61 +90,12 @@ func (appContext *AppContext) loadConfig(login string, installationId int64) err
 	return nil
 }
 
-func (appContext *AppContext) loadInstallationIdCache() error {
-	client := github.NewClient(&http.Client{Transport: appContext.appTransport})
-	options := &github.ListOptions{
-		PerPage: 100,
-		Page:    1,
-	}
-
-	// Keep retrieving all intstallaions until we reach the last page within the response
-	for {
-		installations, response, err := client.Apps.ListInstallations(context.Background(), options)
-		if err != nil {
-			return err
-		}
-
-		for _, installation := range installations {
-			appContext.installationCache.SetInstallationId(installation.Account.GetLogin(), installation.GetID())
-			log.Printf("updating installation cache for login %s\n", installation.Account.GetLogin())
-		}
-		if response.NextPage == 0 {
-			break
-		}
-		options.Page = response.NextPage
-	}
-	return nil
-}
-
-/*
- * Retrieves the installation id from the login (organization or user)
- */
-func (appContext *AppContext) getInstallationID(login string) (int64, error) {
-	if appContext.installationCache.GetInstallationId(login) != 0 {
-		return appContext.installationCache.GetInstallationId(login), nil
-	} else {
-		// Cache miss, retrieve all installations
-		log.Printf("missed cache looking for installation for login %s\n", login)
-
-		err := appContext.loadInstallationIdCache()
-		if err != nil {
-			return 0, err
-		}
-	}
-	installationId := appContext.installationCache.GetInstallationId(login)
-	if installationId == 0 {
-		return 0, fmt.Errorf("no installation found for login %s", login)
-	} else {
-		return installationId, nil
-	}
-}
-
 /*
  * Once the scope has been computed, we can connect to GitHub as an installation and retrieve a scoped token
  */
 func (appContext *AppContext) generateScopedToken(scope *Scope, login string) (ScopedTokenResponse, error) {
-	installationId, err := appContext.getInstallationID(login)
-	if err != nil {
+	installationId := appContext.installationCache.GetInstallationId(login)
+	if installationId == 0 {
 		return ScopedTokenResponse{Message: "no installation found"}, nil
 	}
 
@@ -161,6 +114,9 @@ func (appContext *AppContext) generateScopedToken(scope *Scope, login string) (S
 	return ScopedTokenResponse{InstallationId: installationId, ScopedToken: token.GetToken()}, nil
 }
 
+/*
+ * Received a request to deliver a scoped token for a given OIDC token
+ */
 func (appContext *AppContext) handleTokenRequest(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 
@@ -219,7 +175,6 @@ func (appContext *AppContext) handleTokenRequest(w http.ResponseWriter, req *htt
  * It might mean the configuration has changed and need to be reloaded.
  */
 func (appContext *AppContext) processPushEvent(event github.PushEvent) {
-	log.Println("potential config changed detected")
 	if appContext.checkConfigChange(event) {
 		log.Printf("reloading config for organization %s\n", event.GetRepo().GetOwner().GetLogin())
 		appContext.loadConfig(event.GetRepo().GetOwner().GetLogin(), event.Installation.GetID())
@@ -261,6 +216,17 @@ func (appContext *AppContext) checkConfigChange(event github.PushEvent) bool {
 }
 
 func (appContext *AppContext) processInstallationEvent(event github.InstallationEvent) {
+	login := event.GetInstallation().GetAccount().GetLogin()
+	id := event.GetInstallation().GetID()
+	log.Printf("%s event for installation %d on org %s\n", event.GetAction(), id, login)
+
+	if event.GetAction() == "deleted" || event.GetAction() == "suspend" {
+		appContext.configCache.DeleteConfig(login)
+	} else if event.GetAction() == "created" || event.GetAction() == "unsuspend" {
+		appContext.loadConfig(login, id)
+		appContext.installationCache.SetInstallationId(login, id)
+	}
+
 }
 
 /*
