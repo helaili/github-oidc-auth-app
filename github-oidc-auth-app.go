@@ -27,7 +27,11 @@ func main() {
 		log.Fatal("Wrong format for APP_ID")
 	}
 
-	var configRepo, configFile, wellKnownURL string
+	var webhook_secret, configRepo, configFile, wellKnownURL string
+
+	if webhook_secret = os.Getenv("WEBHOOK_SECRET"); webhook_secret == "" {
+		log.Fatal("WEBHOOK_SECRET is not set")
+	}
 
 	if configRepo = os.Getenv("CONFIG_REPO"); configRepo == "" {
 		configRepo = ".github-private"
@@ -48,7 +52,7 @@ func main() {
 		wellKnownURL = "https://token.actions.githubusercontent.com/.well-known/jwks"
 	}
 
-	appContext := NewAppContext(time.Now(), appTransport, configRepo, configFile, wellKnownURL)
+	appContext := NewAppContext(time.Now(), appTransport, webhook_secret, configRepo, configFile, wellKnownURL)
 
 	fmt.Println("loading config cache")
 	err = appContext.loadConfigs()

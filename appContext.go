@@ -16,6 +16,7 @@ import (
 type AppContext struct {
 	jwksLastUpdate    time.Time
 	appTransport      *ghinstallation.AppsTransport
+	webhook_secret    string
 	configRepo        string
 	configFile        string
 	wellKnownURL      string
@@ -36,13 +37,13 @@ type ScopedTokenResponse struct {
 }
 
 func NewAppContext(jwksLastUpdate time.Time, appTransport *ghinstallation.AppsTransport,
-	configRepo string, configFile string, wellKnownURL string) *AppContext {
+	webhook_secret string, configRepo string, configFile string, wellKnownURL string) *AppContext {
 	installationCache := NewInstallationCache()
 	configCache := NewConfigCache()
 
 	return &AppContext{
 		jwksLastUpdate, appTransport,
-		configRepo, configFile, wellKnownURL,
+		webhook_secret, configRepo, configFile, wellKnownURL,
 		nil, installationCache, configCache}
 }
 
@@ -243,7 +244,7 @@ func (appContext *AppContext) ServeHTTP(w http.ResponseWriter, req *http.Request
 	}
 
 	if req.Method == http.MethodPost && req.RequestURI == "/webhook" {
-		payload, err := github.ValidatePayload(req, nil)
+		payload, err := github.ValidatePayload(req, []byte(appContext.webhook_secret))
 		if err != nil {
 			log.Println("failed to validate webhook payload:", err)
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)

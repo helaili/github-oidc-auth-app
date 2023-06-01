@@ -84,6 +84,7 @@ Follow [the instructions](https://docs.github.com/en/apps/creating-github-apps/s
 - There is no need to set a setup URL or a callback URL. You have to provide a homepage URL, but it can be anything as it will not be used.
 - If you are going to use this app beyond the organisation or account that owns the app, make sure to select the `Any account` option in the `Where can this GitHub App be installed?` section. In other words, if you are going to use the app to grant access to a repository in another organisation than the owner of the app, you need to select `Any account` and not `Only on this account`.
 - Note the `App ID` of the app, you will need to provide later as an environment variable to the app runtime.
+- Set a webhook secret. This secret will be provided as an environment variable to the app runtime.
 - Once the application created, generate a private key for this app. You can do that in the `General` section of the app settings. This key is highly confidential and will be provided as a base64 encoded string as an environment variable to the app runtime. You can use the following command to generate the base64 encoded string of the private key:
 
 ```bash
@@ -92,7 +93,7 @@ cat private-key.pem | base64
 
 ## Deploy the app
 - Deploy the app as a runtime built with command `make build` or using [the docker container](https://github.com/helaili/github-oidc-auth-app/pkgs/container/github-oidc-auth-app).
-- Configure the app with the environment variables described above. This variables are at minimum `PORT`, `PRIVATE_KEY` and `APP_ID`.
+- Configure the app with the environment variables described above. These variables are at minimum `PORT`, `WEBHOOK_SECRET`, `PRIVATE_KEY` and `APP_ID`.
 - You can test the app by hitting the `/ping` endpoint. You should get a `Ok` response.
 
 ## Install the app
