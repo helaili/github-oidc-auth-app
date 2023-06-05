@@ -15,6 +15,11 @@ on:
         type: string
         default: 'production'
         required: true
+      tag:
+        description: 'docker image tag'
+        type: string
+        default: 'main'
+        required: true
     outputs:
       endpoint:
         description: "The deployment url"
@@ -77,7 +82,7 @@ jobs:
       id: create_container_app
       run: |
         fqdn=$(az containerapp create -n oidc-auth-app-${{ inputs.environment }} -g ${{ vars.RESSOURCE_GROUP }} \
-            --image ghcr.io/${{ github.repository }}:main --environment oidc-auth-${{ inputs.environment }}-env \
+            --image ghcr.io/${{ github.repository }}:${{ inputs.tag }} --environment oidc-auth-${{ inputs.environment }}-env \
             --ingress external --target-port 9090 \
             --registry-server gcr.io --registry-username ${{ github.repository_owner }} --registry-password dummy \
             --secrets key=${{ secrets.PRIVATE_KEY }} \
