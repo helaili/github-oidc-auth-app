@@ -1,4 +1,4 @@
-name: Manual Deploy
+name: Sandbox Deploy
 
 on:
   workflow_dispatch:
