@@ -19,7 +19,6 @@ on:
         description: 'docker image tag'
         type: string
         default: 'main'
-        required: true
     outputs:
       endpoint:
         description: "The deployment url"
