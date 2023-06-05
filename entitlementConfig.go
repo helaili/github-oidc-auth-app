@@ -61,8 +61,6 @@ func (config *EntitlementConfig) computeScopes(claims jwt.MapClaims) *Scope {
 
 	strMapClaims := stringifyMapClaims(claims)
 
-	log.Printf("Computing entitlements for org %s", config.Login)
-
 	for _, entitlement := range config.Entitlements {
 		match, _ := regexp.MatchString(entitlement.regexString(), strMapClaims)
 		if match {

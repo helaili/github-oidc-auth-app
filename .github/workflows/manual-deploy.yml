@@ -8,6 +8,10 @@ on:
         type: environment
         default: 'sandbox'
         required: true
+      tag:
+        description: 'docker image tag'
+        type: string
+        default: 'main'
 
 jobs:
   setenv:
@@ -39,6 +43,7 @@ jobs:
       actions: write
     with:
       environment: ${{ inputs.environment }}
+      tag: ${{ inputs.tag }}
   
   test:
     needs:

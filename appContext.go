@@ -154,7 +154,7 @@ func (appContext *AppContext) handleTokenRequest(w http.ResponseWriter, req *htt
 
 	scopedTokenResponse, err := appContext.generateScopedToken(scope, scopedTokenRequest.Login)
 	if err != nil {
-		log.Printf("failed to generate scoped tokens for claims: %v, %s\n", claims, err)
+		log.Printf("failed to generate scoped tokens on org %s with permissions %v for claims: %v, %s\n", scopedTokenRequest.Login, scope, claims, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
