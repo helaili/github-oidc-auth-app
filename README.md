@@ -65,6 +65,8 @@ Those are the environment variables that can be used to configure the app:
 
 `PORT`: **Required**. The port the process will listen to
 
+`WEBHOOK_SECRET`: **Required**. The secret used to sign the webhook payloads
+
 `PRIVATE_KEY`: **Required**. The private key of the GitHub App as base64 encoded string
 
 `APP_ID`: **Required**. The ID of the GitHub App
