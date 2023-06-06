@@ -79,7 +79,7 @@ jobs:
         with:
           login: ${{ inputs.login }}
           endpoint: ${{ inputs.endpoint }}
-      - name: Use the token
+      - name: Use the token for repo access
         uses: actions/github-script@v6
         with:
           github-token: ${{ env.SCOPED_TOKEN }}
@@ -107,6 +107,62 @@ jobs:
               }
             }).catch((error) => {
               console.log('We should not be able to access octodemo/.github-private, this is expected')
+            })
+
+      - name: Use the token for repo access
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ env.SCOPED_TOKEN }}
+          script: |
+            github.rest.repos.get({
+              owner: '${{ vars.TEST_ORG }}',
+              repo: '${{ vars.TEST_REPO }}'
+            }).then((response) => {
+              if(!response.data.full_name) {
+                core.setFailed(`Failed to access repo ${{ vars.TEST_ORG }}/${{ vars.TEST_REPO }}. Response was ${response}`);
+              } else {
+                console.log('Successfully accessed repo ${{ vars.TEST_ORG }}/${{ vars.TEST_REPO }}');
+              }
+            }).catch((error) => {
+              core.setFailed(`Failed to access repo. Error was ${error}`);
+            })
+
+            // Let's try to access a repo we should not have access to with this token
+            github.rest.repos.get({
+              owner: 'octodemo',
+              repo: '.github-private'
+            }).then((response) => {
+              if(response.data.full_name) {
+                core.setFailed('We should not be able to access this repo, that is not expected');
+              }
+            }).catch((error) => {
+              console.log('We should not be able to access octodemo/.github-private, this is expected')
+            })
+  
+      - name: Use the token for org access
+        uses: actions/github-script@v6
+        if: ${{ inputs.environment == 'production' }}
+        with:
+          github-token: ${{ env.SCOPED_TOKEN }}
+          script: |
+            github.rest.org.listMembers({
+              org: '${{ vars.TEST_ORG }}'
+            }).then((response) => {
+              if(!response.data) {
+                core.setFailed(`Failed to access org ${{ vars.TEST_ORG }}. Response was ${response}`);
+              } else {
+                if (response.data.length == 0) {
+                  core.setFailed(`No members found in org ${{ vars.TEST_ORG }}. Response was ${response}`);
+                } else {
+                  console.log('Successfully accessed org ${{ vars.TEST_ORG }}');
+                }
+                console.log(response.data);
+                for(const member of response.data) {
+                  console.log(member.login);
+                }
+              }
+            }).catch((error) => {
+              core.setFailed(`Failed to access repo. Error was ${error}`);
             })
 
   no-configured-entitlement:
