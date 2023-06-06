@@ -145,7 +145,7 @@ jobs:
         with:
           github-token: ${{ env.SCOPED_TOKEN }}
           script: |
-            github.rest.org.listMembers({
+            github.rest.orgs.listMembers({
               org: '${{ vars.TEST_ORG }}'
             }).then((response) => {
               if(!response.data) {
