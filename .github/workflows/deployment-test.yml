@@ -145,20 +145,20 @@ jobs:
         with:
           github-token: ${{ env.SCOPED_TOKEN }}
           script: |
-            github.rest.orgs.listMembers({
+            github.rest.orgs.listAppInstallations({
               org: '${{ vars.TEST_ORG }}'
             }).then((response) => {
               if(!response.data) {
                 core.setFailed(`Failed to access org ${{ vars.TEST_ORG }}. Response was ${response}`);
               } else {
                 if (response.data.length == 0) {
-                  core.setFailed(`No members found in org ${{ vars.TEST_ORG }}. Response was ${response}`);
+                  core.setFailed(`No app found in org ${{ vars.TEST_ORG }}. Response was ${response}`);
                 } else {
                   console.log('Successfully accessed org ${{ vars.TEST_ORG }}');
                 }
                 console.log(response.data);
-                for(const member of response.data) {
-                  console.log(member.login);
+                for(const app of response.data) {
+                  console.log(app.name);
                 }
               }
             }).catch((error) => {
