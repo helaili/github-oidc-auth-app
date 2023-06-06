@@ -107,8 +107,22 @@ cat private-key.pem | base64
 - Install the app on each organisations that will need to be accessed by the workflows. You can do that by following [the instructions](https://docs.github.com/en/apps/maintaining-github-apps/installing-github-apps). Remember to select the repositories that will accessed by the app, including the one that will host the `oidc_entitlements.yml` configuration file.
 
 ## Create a configuration file
-- Commit an `oidc_entitlements.yml` file in the `.github-private` repository (or whatever value you provided to the runtime with the  `CONFIG_REPO` and `CONFIG_FILE` environment variables) of each organisation that will need to be accessed by the workflows. The file should look like below. It is a basically an array of claims to match and the permissions to grant if the claim matches. The claims are the ones provided by the OIDC token.
+- Commit an `oidc_entitlements.yml` file in the `.github-private` repository (or whatever value you provided to the runtime with the  `CONFIG_REPO` and `CONFIG_FILE` environment variables) of each organisation that will need to be accessed by the workflows. The file should look like below. It is a basically an array of claims to match and the permissions to grant if the claim matches. The claims are the ones provided by the OIDC token and represent properties of the GitHub Actions workflow (along with information about actor, repo, commit...) which needs to retrieve the scoped token. 
 
+```yaml
+- claim 1: value 1
+  claim 2: value 2
+  claim 3: value 3
+  scopes:
+    repositories: 
+      - repo I will get access to 1
+      - repo I will get access to 2
+    permissions: 
+      - permsission I will be granted with
+      - permsission I will be granted with
+```
+
+### Example
 ```yaml
 - workflow: My first worlflow
   repository: ziggy/stardust
