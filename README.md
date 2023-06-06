@@ -86,7 +86,7 @@ You have two options: you can go through the manual steps listed below, or go to
 ### Manual steps
 
 Follow [the instructions](https://docs.github.com/en/apps/creating-github-apps/setting-up-a-github-app/creating-a-github-app) to create the GitHub App. Couple things to keep in mind while creating this app:
-- You need to set permissions for this app. This permissions need to be the sum of permissions of all the scoped tokens you intend to generate. You might have to review this list of permissions if you want to add a new scope later on.
+- You need to set permissions for this app. This permissions need to be the sum of permissions of all the scoped tokens you intend to generate. You might have to review this list of permissions if you want to add a new scope later on. At minimum, it should have the `contents:read` permission and subsribe to the `push` event so that the cached configuration can be updated when it changes. 
 - The webhook URL should be `https://<your url>/webhook`. 
 - There is no need to set a setup URL or a callback URL. You have to provide a homepage URL, but it can be anything as it will not be used.
 - If you are going to use this app beyond the organisation or account that owns the app, make sure to select the `Any account` option in the `Where can this GitHub App be installed?` section. In other words, if you are going to use the app to grant access to a repository in another organisation than the owner of the app, you need to select `Any account` and not `Only on this account`.
