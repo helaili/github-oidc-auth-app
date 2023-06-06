@@ -1,4 +1,4 @@
-name: Sandbox Deploy
+name: Sandbox Test
 
 on:
   workflow_dispatch:
