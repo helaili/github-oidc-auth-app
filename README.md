@@ -80,6 +80,11 @@ Those are the environment variables that can be used to configure the app:
 # Installation
 
 ## Create a GitHub App 
+
+You have two options: you can go through the manual steps listed below, or go to [this site](https://helaili.github.io/github-oidc-auth-site/deploy) and click the deploy link. It will install the application with minimal permissions and provide you with the `APP_ID`, the `WEBHOOK_SECRET` and the base64 encoded `PRIVATE_KEY` string. You will need to provide a webhook which in certain cases will be a 🐔🥚situation, so you might need to update this later. In any case, you will most likely need to go back to the app settings from https://github.com/organizations/<your org>/settings/apps in order to fine tune the permissions granted to the app. 
+
+### Manual steps
+
 Follow [the instructions](https://docs.github.com/en/apps/creating-github-apps/setting-up-a-github-app/creating-a-github-app) to create the GitHub App. Couple things to keep in mind while creating this app:
 - You need to set permissions for this app. This permissions need to be the sum of permissions of all the scoped tokens you intend to generate. You might have to review this list of permissions if you want to add a new scope later on.
 - The webhook URL should be `https://<your url>/webhook`. 
@@ -182,6 +187,7 @@ The list of claims currently supported by this app is currently limited to the l
 
 See the the `properties of permissions` section [here](https://docs.github.com/en/enterprise-cloud@latest/rest/apps/apps?apiVersion=2022-11-28#create-a-scoped-access-token) to see the list of permissions and their values.
 
+:rotating_light: **Important**: Don't forget to update the app permissions anytime you change this configuration. You might need to remove or add some permissions. 
 
 ## Use the action
 The companion action [`helaili/github-oidc-auth`](https://github.com/helaili/github-oidc-auth) will retrieve the scoped token. It needs two inputs:
