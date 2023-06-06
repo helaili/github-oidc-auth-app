@@ -2,51 +2,12 @@ name: Sandbox Deploy
 
 on:
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'docker image tag'
-        required: true
-        default: 'main'
-        type: choice
-        options:
-          - main
-          - latest
-          - nightly
-  release:
-
+  schedule:
+    - cron: '5 5 * * *'
+    
 jobs:
-  resolve-tag: 
-    runs-on: ubuntu-latest
-    outputs: 
-      tag: ${{ steps.resolve-tag.outputs.tag }}
-    steps:
-      - id: resolve-tag
-        run: |
-          if [  ${{ github.event_name }} == "release" ]; then
-            echo "tag=latest" >> $GITHUB_OUTPUT
-          else 
-            echo "tag=${{ github.event.inputs.tag  }}" >> $GITHUB_OUTPUT
-          fi
-
-  deploy:
-    name: Deploy
-    needs: resolve-tag
-    concurrency:
-      group: sandbox
-      cancel-in-progress: true
-    uses: ./.github/workflows/deploy-azure-container-app.yml
-    secrets: inherit 
-    permissions:
-      id-token: write
-      packages: read
-      actions: write
-    with:
-      environment: sandbox
-      tag: ${{ needs.resolve-tag.outputs.tag }}
-  
+ 
   test:
-    needs:
-      - deploy
     permissions:
       id-token: write
     runs-on: ubuntu-latest
