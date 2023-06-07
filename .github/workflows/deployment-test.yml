@@ -158,7 +158,7 @@ jobs:
                 }
               }
             }).catch((error) => {
-              core.setFailed(`Failed to access repo. Error was ${error}`);
+              core.setFailed(`Failed to access org. Error was ${error.message}`);
             })
 
   no-configured-entitlement:
