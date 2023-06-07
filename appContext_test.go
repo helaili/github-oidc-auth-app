@@ -16,9 +16,9 @@ func TestFileBasedConfigFileAdded(t *testing.T) {
 			},
 		},
 		Commits: []*github.HeadCommit{
-			&github.HeadCommit{
+			{
 				Added: []string{
-					"oidc_entitlements.yml",
+					"oidc_entitlements.json",
 				},
 			},
 		},
@@ -26,7 +26,7 @@ func TestFileBasedConfigFileAdded(t *testing.T) {
 
 	context := AppContext{
 		configRepo: ".github-private",
-		configFile: "oidc_entitlements.yml",
+		configFile: "oidc_entitlements.json",
 	}
 
 	if context.checkConfigChange(event) != true {
@@ -44,9 +44,9 @@ func TestFileBasedConfigFileRemoved(t *testing.T) {
 			},
 		},
 		Commits: []*github.HeadCommit{
-			&github.HeadCommit{
+			{
 				Removed: []string{
-					"oidc_entitlements.yml",
+					"oidc_entitlements.json",
 				},
 			},
 		},
@@ -54,7 +54,7 @@ func TestFileBasedConfigFileRemoved(t *testing.T) {
 
 	context := AppContext{
 		configRepo: ".github-private",
-		configFile: "oidc_entitlements.yml",
+		configFile: "oidc_entitlements.json",
 	}
 
 	if context.checkConfigChange(event) != true {
@@ -72,9 +72,9 @@ func TestFileBasedConfigFileModified(t *testing.T) {
 			},
 		},
 		Commits: []*github.HeadCommit{
-			&github.HeadCommit{
+			{
 				Modified: []string{
-					"oidc_entitlements.yml",
+					"oidc_entitlements.json",
 				},
 			},
 		},
@@ -82,7 +82,7 @@ func TestFileBasedConfigFileModified(t *testing.T) {
 
 	context := AppContext{
 		configRepo: ".github-private",
-		configFile: "oidc_entitlements.yml",
+		configFile: "oidc_entitlements.json",
 	}
 
 	if context.checkConfigChange(event) != true {
@@ -100,14 +100,14 @@ func TestFileBasedConfigFileAddedInSecondCommit(t *testing.T) {
 			},
 		},
 		Commits: []*github.HeadCommit{
-			&github.HeadCommit{
+			{
 				Added: []string{
 					"dummy.yml",
 				},
 			},
-			&github.HeadCommit{
+			{
 				Added: []string{
-					"oidc_entitlements.yml",
+					"oidc_entitlements.json",
 				},
 			},
 		},
@@ -115,7 +115,7 @@ func TestFileBasedConfigFileAddedInSecondCommit(t *testing.T) {
 
 	context := AppContext{
 		configRepo: ".github-private",
-		configFile: "oidc_entitlements.yml",
+		configFile: "oidc_entitlements.json",
 	}
 
 	if context.checkConfigChange(event) != true {
@@ -133,7 +133,7 @@ func TestFileBasedConfigOtherFileAdded(t *testing.T) {
 			},
 		},
 		Commits: []*github.HeadCommit{
-			&github.HeadCommit{
+			{
 				Added: []string{
 					"dummy.yml",
 				},
@@ -143,7 +143,7 @@ func TestFileBasedConfigOtherFileAdded(t *testing.T) {
 
 	context := AppContext{
 		configRepo: ".github-private",
-		configFile: "oidc_entitlements.yml",
+		configFile: "oidc_entitlements.json",
 	}
 
 	if context.checkConfigChange(event) != false {
@@ -161,9 +161,9 @@ func TestFileBasedConfigFileAddedToOtherRepo(t *testing.T) {
 			},
 		},
 		Commits: []*github.HeadCommit{
-			&github.HeadCommit{
+			{
 				Added: []string{
-					"oidc_entitlements.yml",
+					"oidc_entitlements.json",
 				},
 			},
 		},
@@ -171,7 +171,7 @@ func TestFileBasedConfigFileAddedToOtherRepo(t *testing.T) {
 
 	context := AppContext{
 		configRepo: ".github-private",
-		configFile: "oidc_entitlements.yml",
+		configFile: "oidc_entitlements.json",
 	}
 
 	if context.checkConfigChange(event) != false {

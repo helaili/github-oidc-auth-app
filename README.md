@@ -1,4 +1,4 @@
-[![Publish and Deploy](https://github.com/helaili/github-oidc-auth-app/actions/workflows/deploy.yml/badge.svg)](https://github.com/helaili/github-oidc-auth-app/actions/workflows/deploy.yml)
+[![Publish and Deploy](https://github.com/helaili/github-oidc-auth-app/actions/workflows/deploy.json/badge.svg)](https://github.com/helaili/github-oidc-auth-app/actions/workflows/deploy.json)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/helaili/github-oidc-auth-app?label=latest&logo=docker)](https://github.com/helaili/github-oidc-auth-app/pkgs/container/github-oidc-auth-app/97506464?tag=latest)
 
 # github-oidc-auth-app
@@ -73,7 +73,7 @@ Those are the environment variables that can be used to configure the app:
 
 `CONFIG_REPO`: **Optional**. The name of the repository where the configuration file is stored. Default to `.github-private`
 
-`CONFIG_FILE`: **Optional**. The name of the configuration file. Default to `oidc_entitlements.yml`
+`CONFIG_FILE`: **Optional**. The name of the configuration file. Default to `oidc_entitlements.json`
 
 `GHES_URL`: **Optional**. The URL of the GitHub Enterprise Server in the form of `https://ghes.example.com`. If not provided, the app will use `https://github.com`.
 
@@ -104,70 +104,108 @@ cat private-key.pem | base64
 - You can test the app by hitting the `/ping` endpoint. You should get a `Ok` response.
 
 ## Install the app
-- Install the app on each organisations that will need to be accessed by the workflows. You can do that by following [the instructions](https://docs.github.com/en/apps/maintaining-github-apps/installing-github-apps). Remember to select the repositories that will accessed by the app, including the one that will host the `oidc_entitlements.yml` configuration file.
+- Install the app on each organisations that will need to be accessed by the workflows. You can do that by following [the instructions](https://docs.github.com/en/apps/maintaining-github-apps/installing-github-apps). Remember to select the repositories that will accessed by the app, including the one that will host the `oidc_entitlements.json` configuration file.
 
 ## Create a configuration file
-- Commit an `oidc_entitlements.yml` file in the `.github-private` repository (or whatever value you provided to the runtime with the  `CONFIG_REPO` and `CONFIG_FILE` environment variables) of each organisation that will need to be accessed by the workflows. The file should look like below. It is a basically an array of claims to match and the permissions to grant if the claim matches. The claims are the ones provided by the OIDC token and represent properties of the GitHub Actions workflow (along with information about actor, repo, commit...) which needs to retrieve the scoped token. 
+- Commit an `oidc_entitlements.json` file in the `.github-private` repository (or whatever value you provided to the runtime with the  `CONFIG_REPO` and `CONFIG_FILE` environment variables) of each organisation that will need to be accessed by the workflows. The file should look like below. It is a basically an array of claims to match and the permissions to grant if the claim matches. The claims are the ones provided by the OIDC token and represent properties of the GitHub Actions workflow (along with information about actor, repo, commit...) which needs to retrieve the scoped token. 
 
-```yaml
-- claim 1: value 1
-  claim 2: value 2
-  claim 3: value 3
-  scopes:
-    repositories: 
-      - repo I will get access to 1
-      - repo I will get access to 2
-    permissions: 
-      - permsission I will be granted with
-      - permsission I will be granted with
+```json
+[
+    {
+        "claim 1": "value 1",
+        "claim 2": "value 2",
+        "claim 3": "value 3",
+        "scopes": {
+            "repositories": [
+                "repo I will get access to 1",
+                "repo I will get access to 2"
+            ],
+            "permissions": [
+                "permsission I will be granted with",
+                "permsission I will be granted with"
+            ]
+        }
+    }
+]
 ```
 
 ### Example
-```yaml
-- workflow: My first worlflow
-  repository: ziggy/stardust
-  scopes:
-    repositories: 
-      - codespace-oddity
-    permissions: 
-      contents: write
-      checks: write
-      administration: read
-- environment: production
-  repository_owner: talkingheads
-  repository_visibility: public
-  scopes:
-    repositories: 
-      - codespace-oddity
-    permissions: 
-      contents: write
-- repository_owner: talkingheads
-  repository: talkingheads/road-to-nowhere
-  scopes:
-    repositories: 
-      - starman
-    permissions: 
-      contents: read
-      organization_administration: write
+```json
+[
+    {
+        "workflow": "My first worlflow",
+        "repository": "ziggy/stardust",
+        "scopes": {
+            "repositories": [
+                "codespace-oddity"
+            ],
+            "permissions": {
+                "contents": "write",
+                "checks": "write",
+                "administration": "read"
+            }
+        }
+    },
+    {
+        "environment": "production",
+        "repository_owner": "talkingheads",
+        "repository_visibility": "public",
+        "scopes": {
+            "repositories": [
+                "codespace-oddity"
+            ],
+            "permissions": {
+                "contents": "write"
+            }
+        }
+    },
+    {
+        "repository_owner": "talkingheads",
+        "repository": "talkingheads/road-to-nowhere",
+        "scopes": {
+            "repositories": [
+                "starman"
+            ],
+            "permissions": {
+                "contents": "read",
+                "organization_administration": "write"
+            }
+        }
+    }
+]
 ```
  
  If a set of claim matches several entries, the permissions will be the sum of the permissions of all the matching entries. For instance, a job targeting the `production` environment in a `public` repository named `talkingheads/road-to-nowhere` will get the following permissions:
  
- ```yaml
-repositories: 
-  - codespace-oddity
-  - starman
-permissions: 
-  contents: write
-  organization_administration: write
+ ```json
+{
+    "repositories": [
+        "codespace-oddity",
+        "starman"
+    ],
+    "permissions": {
+        "contents": "write",
+        "organization_administration": "write"
+    }
+}
  ```
 
 Remember that the app you created needs to have the permissions of all the different scoped tokens it will generate. Therefore, with the configuration above, the app  will need to have the following permissions:
-```yaml
-- contents: write
-- checks: write
-- administration: read
-- organization_administration: write
+```json
+[
+    {
+        "contents": "write"
+    },
+    {
+        "checks": "write"
+    },
+    {
+        "administration": "read"
+    },
+    {
+        "organization_administration": "write"
+    }
+]
 ```
 
 The list of claims currently supported by this app is currently limited to the list below. See the [GitHub documentation](https://docs.github.com/en/enterprise-cloud@latest/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#configuring-the-oidc-trust-with-the-cloud) for more details about the meaning of these claims.
@@ -242,7 +280,7 @@ You might to give this app and action a try without going through the hassle of 
 - issues: `write`
 
 In order to use this sandbox, you will need to:
-- Create a file named `oidc_entitlements.yml` in the `.github-private` repository of your organisation as previously explained. 
+- Create a file named `oidc_entitlements.json` in the `.github-private` repository of your organisation as previously explained. 
 - Install the app on your organisation by clicking [here](https://github.com/apps/oidc-auth-for-github-sandbox). Make sure you grant the app access to at least the `.github-private` repository and whichever other one within this organisation that you will want to access using the token. 
 - Create a workflow that uses the action `helaili/github-oidc-auth` as shown below. 
 

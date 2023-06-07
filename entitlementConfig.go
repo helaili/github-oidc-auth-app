@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"regexp"
@@ -9,7 +10,6 @@ import (
 	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-github/v52/github"
-	"gopkg.in/yaml.v2"
 )
 
 type EntitlementConfig struct {
@@ -31,21 +31,24 @@ func (config *EntitlementConfig) load(appTransport *ghinstallation.AppsTransport
 	// Use installation transport with github.com/google/go-github
 	client := github.NewClient(&http.Client{Transport: itr})
 
-	// Retrieve the oidc_entitlements.yml file from the .github-private repository in the organization that owns the installation
+	// Retrieve the oidc_entitlements.json file from the .github-private repository in the organization that owns the installation
 	fileContent, _, _, err := client.Repositories.GetContents(context.Background(), config.Login, config.Repo, config.File, &github.RepositoryContentGetOptions{})
 	if err != nil {
+		log.Println("couldn't download file")
 		return err
 	}
 
-	// Get the content of the oidc_entitlements.yml file as a string
+	// Get the content of the oidc_entitlements.json file as a string
 	content, err := fileContent.GetContent()
 	if err != nil {
+		log.Println("couldn't get file content as string")
 		return err
 	}
 
-	// Parse the oidc_entitlements.yml file as YAML
-	err = yaml.Unmarshal([]byte(content), &(config.Entitlements))
+	// Parse the oidc_entitlements.json file as JSON
+	err = json.Unmarshal([]byte(content), &(config.Entitlements))
 	if err != nil {
+		log.Printf("failed to parse JSON file %s", config.File)
 		return err
 	}
 	log.Printf("Loaded %d entitlements for org %s", len(config.Entitlements), config.Login)

@@ -9,8 +9,8 @@ import (
 )
 
 type Scope struct {
-	Repositories []string                       `yaml:"repositories,omitempty"`
-	Permissions  github.InstallationPermissions `yaml:"permissions,omitempty"`
+	Repositories []string                       `json:"repositories,omitempty"`
+	Permissions  github.InstallationPermissions `json:"permissions,omitempty"`
 }
 
 func NewScope() *Scope {

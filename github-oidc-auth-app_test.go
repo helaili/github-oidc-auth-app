@@ -1,13 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"reflect"
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-github/v52/github"
-	"gopkg.in/yaml.v2"
 )
 
 var claims jwt.MapClaims = jwt.MapClaims{
@@ -88,14 +88,14 @@ func TestFuzzyRegexEntitlement(t *testing.T) {
 
 func TestComputeSimpleEntitlements(t *testing.T) {
 	//Load the sample config file as a string
-	b, err := os.ReadFile("test/precise-match.yml")
+	b, err := os.ReadFile("test/precise-match.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	content := string(b)
 	var entitlements []Entitlement
-	err = yaml.Unmarshal([]byte(content), &entitlements)
+	err = json.Unmarshal([]byte(content), &entitlements)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -113,23 +113,25 @@ func TestComputeSimpleEntitlements(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(scope.Repositories, expectedRepoList) {
-		t.Error("Expected scope.Repositories to be [codespace-oddity], but got", scope.Repositories)
+		t.Errorf("Expected scope.Repositories to be [codespace-oddity], but got %s", scope.Repositories)
 	}
 	if !reflect.DeepEqual(scope.Permissions, expectedPermissions) {
-		t.Error("Expected scope.Permissions to be", expectedPermissions, ", but got", scope.Permissions)
+		expPerms, _ := json.MarshalIndent(expectedPermissions, "", "  ")
+		gotPerms, _ := json.MarshalIndent(scope.Permissions, "", "  ")
+		t.Errorf("Expected scope.Permissions to be %s, but got %v", string(expPerms), string(gotPerms))
 	}
 }
 
 func TestComputeMultipleEntitlements(t *testing.T) {
 	//Load the sample config file as a string
-	b, err := os.ReadFile("test/multiple-match.yml") // just pass the file name
+	b, err := os.ReadFile("test/multiple-match.json") // just pass the file name
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	content := string(b) // convert content to a 'string'
 	var entitlements []Entitlement
-	err = yaml.Unmarshal([]byte(content), &entitlements)
+	err = json.Unmarshal([]byte(content), &entitlements)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,30 +144,33 @@ func TestComputeMultipleEntitlements(t *testing.T) {
 	read := "read"
 	write := "write"
 	expectedPermissions := github.InstallationPermissions{
-		Contents: &write,
-		Checks:   &read,
+		Contents:             &write,
+		Checks:               &read,
+		OrganizationProjects: &read,
 	}
 
 	// Compute the scope for the claims
 	scope := entitlementConfig.computeScopes(claims)
 	if !reflect.DeepEqual(scope.Repositories, expectedRepoList) {
-		t.Error("Expected scope.Repositories to be [codespace-oddity, bootstrap], but got", scope.Repositories)
+		t.Errorf("Expected scope.Repositories to be [codespace-oddity, bootstrap], but got %s", scope.Repositories)
 	}
 	if !reflect.DeepEqual(scope.Permissions, expectedPermissions) {
-		t.Error("Expected scope.Permissions to be", expectedPermissions, ", but got", scope.Permissions)
+		expPerms, _ := json.MarshalIndent(expectedPermissions, "", "  ")
+		gotPerms, _ := json.MarshalIndent(scope.Permissions, "", "  ")
+		t.Errorf("Expected scope.Permissions to be %s, but got %v", string(expPerms), string(gotPerms))
 	}
 }
 
 func TestNoEntitlements(t *testing.T) {
 	//Load the sample config file as a string
-	b, err := os.ReadFile("test/no-match.yml")
+	b, err := os.ReadFile("test/no-match.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	content := string(b)
 	var entitlements []Entitlement
-	err = yaml.Unmarshal([]byte(content), &entitlements)
+	err = json.Unmarshal([]byte(content), &entitlements)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -180,9 +185,11 @@ func TestNoEntitlements(t *testing.T) {
 	expectedPermissions := github.InstallationPermissions{}
 
 	if !reflect.DeepEqual(scope.Repositories, expectedRepoList) {
-		t.Error("Expected scope.Repositories to be empty, but got", scope.Repositories)
+		t.Errorf("Expected scope.Repositories to be empty, but got %s", scope.Repositories)
 	}
 	if !reflect.DeepEqual(scope.Permissions, expectedPermissions) {
-		t.Error("Expected scope.Permissions to be empty, but got", scope.Permissions)
+		expPerms, _ := json.MarshalIndent(expectedPermissions, "", "  ")
+		gotPerms, _ := json.MarshalIndent(scope.Permissions, "", "  ")
+		t.Errorf("Expected scope.Permissions to be %s, but got %v", string(expPerms), string(gotPerms))
 	}
 }

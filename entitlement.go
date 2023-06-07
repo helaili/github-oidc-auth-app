@@ -3,32 +3,32 @@ package main
 import "fmt"
 
 type Entitlement struct {
-	Actor             string `yaml:"actor,omitempty"`
-	ActorId           int64  `yaml:"actor_id,omitempty"`
-	Audience          string `yaml:"aud,omitempty"`
-	BaseRef           string `yaml:"base_ref,omitempty"`
-	Environment       string `yaml:"environment,omitempty"`
-	EventName         string `yaml:"event_name,omitempty"`
-	HeadRef           string `yaml:"head_ref,omitempty"`
-	Issuer            string `yaml:"iss,omitempty"`
-	JobWokflowRef     string `yaml:"job_workflow_ref,omitempty"`
-	JobWokflowSha     string `yaml:"job_workflow_sha,omitempty"`
-	Ref               string `yaml:"ref,omitempty"`
-	RefType           string `yaml:"ref_type,omitempty"`
-	Repository        string `yaml:"repository,omitempty"`
-	RepositoryId      int64  `yaml:"repository_id,omitempty"`
-	RepositoryOwner   string `yaml:"repository_owner,omitempty"`
-	RepositoryOwnerId int64  `yaml:"repository_owner_id,omitempty"`
-	RunAttempt        int64  `yaml:"run_attempt,omitempty"`
-	RunId             int64  `yaml:"run_id,omitempty"`
-	RunNumber         int64  `yaml:"run_number,omitempty"`
-	RunnerEnvironment string `yaml:"runner_environment,omitempty"`
-	Subject           string `yaml:"sub,omitempty"`
-	Visibility        string `yaml:"repository_visibility,omitempty"`
-	Workflow          string `yaml:"workflow,omitempty"`
-	WorkflowRef       string `yaml:"workflow_ref,omitempty"`
-	WorkflowSha       string `yaml:"workflow_sha,omitempty"`
-	Scopes            Scope  `yaml:"scopes"`
+	Actor             string `json:"actor,omitempty"`
+	ActorId           int64  `json:"actor_id,omitempty"`
+	Audience          string `json:"aud,omitempty"`
+	BaseRef           string `json:"base_ref,omitempty"`
+	Environment       string `json:"environment,omitempty"`
+	EventName         string `json:"event_name,omitempty"`
+	HeadRef           string `json:"head_ref,omitempty"`
+	Issuer            string `json:"iss,omitempty"`
+	JobWokflowRef     string `json:"job_workflow_ref,omitempty"`
+	JobWokflowSha     string `json:"job_workflow_sha,omitempty"`
+	Ref               string `json:"ref,omitempty"`
+	RefType           string `json:"ref_type,omitempty"`
+	Repository        string `json:"repository,omitempty"`
+	RepositoryId      int64  `json:"repository_id,omitempty"`
+	RepositoryOwner   string `json:"repository_owner,omitempty"`
+	RepositoryOwnerId int64  `json:"repository_owner_id,omitempty"`
+	RunAttempt        int64  `json:"run_attempt,omitempty"`
+	RunId             int64  `json:"run_id,omitempty"`
+	RunNumber         int64  `json:"run_number,omitempty"`
+	RunnerEnvironment string `json:"runner_environment,omitempty"`
+	Subject           string `json:"sub,omitempty"`
+	Visibility        string `json:"repository_visibility,omitempty"`
+	Workflow          string `json:"workflow,omitempty"`
+	WorkflowRef       string `json:"workflow_ref,omitempty"`
+	WorkflowSha       string `json:"workflow_sha,omitempty"`
+	Scopes            Scope  `json:"scopes"`
 }
 
 func (e Entitlement) regexString() string {

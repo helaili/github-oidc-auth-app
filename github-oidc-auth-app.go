@@ -37,7 +37,7 @@ func main() {
 		configRepo = ".github-private"
 	}
 	if configFile = os.Getenv("CONFIG_FILE"); configFile == "" {
-		configFile = "oidc_entitlements.yml"
+		configFile = "oidc_entitlements.json"
 	}
 
 	appTransport, err := ghinstallation.NewAppsTransport(http.DefaultTransport, app_id, private_key)
