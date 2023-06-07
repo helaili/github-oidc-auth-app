@@ -141,7 +141,7 @@ jobs:
   
       - name: Use the token for org access
         uses: actions/github-script@v6
-        if: ${{ inputs.environment == 'production' }}
+        if: ${{ inputs.environment == 'production' || inputs.environment == 'development' }}
         with:
           github-token: ${{ env.SCOPED_TOKEN }}
           script: |
@@ -182,7 +182,7 @@ jobs:
         run: |
           if [ -n "$SCOPED_TOKEN" ]; then
             echo "::error title=Failure::Token should have been empty, something went wrong"
-            exit 0
+            exit 1
           else
             echo "Sweet succsess!"
           fi
