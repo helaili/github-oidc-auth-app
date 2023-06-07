@@ -148,11 +148,11 @@ jobs:
             github.rest.orgs.listAppInstallations({
               org: '${{ vars.TEST_ORG }}'
             }).then((response) => {
-              if(!response.data.installationsxx) {
+              if(!response.data.installations) {
                 core.setFailed(`Failed to access org ${{ vars.TEST_ORG }}. Response was ${JSON.stringify(response.data)}`);
               } else {
                 if (response.data.installations.length == 0) {
-                  core.setFailed(`No app found in org ${{ vars.TEST_ORG }}. Response was ${response.data}`);
+                  core.setFailed(`No app found in org ${{ vars.TEST_ORG }}. Response was ${JSON.stringify(response.data)}`);
                 } else {
                   console.log('Successfully accessed org ${{ vars.TEST_ORG }}');
                 }
