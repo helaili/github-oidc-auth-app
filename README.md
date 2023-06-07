@@ -83,6 +83,8 @@ Those are the environment variables that can be used to configure the app:
 
 You have two options: you can go through the manual steps listed below, or make your life easy and go to [this site](https://helaili.github.io/github-oidc-auth-site/deploy) and click the deploy link. It will install the application with minimal permissions and provide you with the `APP_ID`, the `WEBHOOK_SECRET` and the base64 encoded `PRIVATE_KEY` string. You will need to provide a webhook which in certain cases will be a 🐔🥚situation, so you might need to update this later. In any case, you will most likely need to go back to the app settings from https://github.com/organizations/<your org>/settings/apps in order to fine tune the permissions granted to the app. 
 
+⚠️ In case you are planning on installing the app on multiple organisations, make sure you set its visibility to `[public](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/making-a-github-app-public-or-private)`. 
+
 ### Manual steps
 
 Follow [the instructions](https://docs.github.com/en/apps/creating-github-apps/setting-up-a-github-app/creating-a-github-app) to create the GitHub App. Couple things to keep in mind while creating this app:
