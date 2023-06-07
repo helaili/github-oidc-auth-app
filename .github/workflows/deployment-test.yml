@@ -42,6 +42,7 @@ jobs:
         with:
           github-token: ${{ env.SCOPED_TOKEN }}
           script: |
+            console.log('Using the token to access ${{ vars.TEST_ORG }}/${{ vars.TEST_REPO }}')
             github.rest.repos.get({
               owner: '${{ vars.TEST_ORG }}',
               repo: '${{ vars.TEST_REPO }}'

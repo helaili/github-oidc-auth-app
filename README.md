@@ -175,7 +175,7 @@ cat private-key.pem | base64
 ]
 ```
  
- If a set of claim matches several entries, the permissions will be the sum of the permissions of all the matching entries. For instance, a job targeting the `production` environment in a `public` repository named `talkingheads/road-to-nowhere` will get the following permissions:
+ If a set of claim matches several entries, the permissions will be the sum of the permissions of all the matching entries. For instance, a job targeting the `production` environment in a `public` repository named `talkingheads/road-to-nowhere` will get the following entitlements:
  
  ```json
 {
@@ -191,21 +191,11 @@ cat private-key.pem | base64
  ```
 
 Remember that the app you created needs to have the permissions of all the different scoped tokens it will generate. Therefore, with the configuration above, the app  will need to have the following permissions:
-```json
-[
-    {
-        "contents": "write"
-    },
-    {
-        "checks": "write"
-    },
-    {
-        "administration": "read"
-    },
-    {
-        "organization_administration": "write"
-    }
-]
+```yaml
+contents: write
+checks: write
+administration: read
+organization_administration: write
 ```
 
 The list of claims currently supported by this app is currently limited to the list below. See the [GitHub documentation](https://docs.github.com/en/enterprise-cloud@latest/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#configuring-the-oidc-trust-with-the-cloud) for more details about the meaning of these claims.
