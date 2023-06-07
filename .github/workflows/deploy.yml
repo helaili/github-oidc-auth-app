@@ -5,6 +5,8 @@ on:
     - cron: '25 21 * * *'
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - '*.md'
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
