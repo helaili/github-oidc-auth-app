@@ -13,6 +13,8 @@ on:
           - latest
           - nightly
   release:
+    types: [released]
+   
 
 jobs:
   resolve-tag: 
