@@ -1,4 +1,4 @@
-[![Publish and Deploy](https://github.com/helaili/github-oidc-auth-app/actions/workflows/deploy.json/badge.svg)](https://github.com/helaili/github-oidc-auth-app/actions/workflows/deploy.json)
+[![Publish and Deploy](https://github.com/helaili/github-oidc-auth-app/actions/workflows/deploy.yml/badge.svg)](https://github.com/helaili/github-oidc-auth-app/actions/workflows/deploy.yml)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/helaili/github-oidc-auth-app?label=latest&logo=docker)](https://github.com/helaili/github-oidc-auth-app/pkgs/container/github-oidc-auth-app/97506464?tag=latest)
 
 # github-oidc-auth-app
