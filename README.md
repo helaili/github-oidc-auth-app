@@ -131,16 +131,16 @@ It will be equivalent to the file below stored at the root of the repository.
 
 ```json
 {
-  repository:       "major-tom/starman",
-	repository_owner: "major-tom",
-	environment:      "production",
-  workflow:         "Manual Test Workflow",
-  scopes: {
-    repositories: [
-      codespace-oddity
+  "repository":       "major-tom/starman",
+	"repository_owner": "major-tom",
+	"environment":      "production",
+  "workflow":         "Manual Test Workflow",
+  "scopes": {
+    "repositories": [
+      "codespace-oddity"
     ],
-    permissions: {
-      contents: "write",
+    "permissions": {
+      "contents": "write",
     }
   }
 }
@@ -407,8 +407,8 @@ You might to give this app and action a try without going through the hassle of 
 - issues: `write`
 
 In order to use this sandbox, you will need to:
-- Create a file named `oidc_entitlements.json` in the `.github-private` repository of your organization as previously explained. 
-- Install the app on your organization by clicking [here](https://github.com/apps/oidc-auth-for-github-sandbox). Make sure you grant the app access to at least the `.github-private` repository and whichever other one within this organization that you will want to access using the token. 
+- Create a repository named `oidc_entitlements` in your organization as previously explained. 
+- Install the app on your organization by clicking [here](https://github.com/apps/oidc-auth-for-github-sandbox). Make sure you grant the app access to at least the `oidc_entitlements` repository and whichever other one within this organization that you will want to access using the token. 
 - Create a workflow that uses the action `helaili/github-oidc-auth` as shown below. 
 
 ```yaml
