@@ -23,6 +23,7 @@ type AppContext struct {
 	jwksCache         []byte
 	installationCache *InstallationCache
 	configCache       *ConfigCache
+	gitURL            string
 }
 
 type ScopedTokenRequest struct {
@@ -37,14 +38,14 @@ type ScopedTokenResponse struct {
 }
 
 func NewAppContext(jwksLastUpdate time.Time, appTransport *ghinstallation.AppsTransport,
-	webhook_secret string, configRepo string, configFile string, wellKnownURL string) *AppContext {
+	webhook_secret string, configRepo string, configFile string, wellKnownURL string, gitUrl string) *AppContext {
 	installationCache := NewInstallationCache()
 	configCache := NewConfigCache()
 
 	return &AppContext{
 		jwksLastUpdate, appTransport,
 		webhook_secret, configRepo, configFile, wellKnownURL,
-		nil, installationCache, configCache}
+		nil, installationCache, configCache, gitUrl}
 }
 
 func (appContext *AppContext) loadConfigs() error {
@@ -76,7 +77,7 @@ func (appContext *AppContext) loadConfigs() error {
 }
 
 func (appContext *AppContext) loadConfig(login string, installationId int64) error {
-	config := NewEntitlementConfig(login, installationId, appContext.configRepo, appContext.configFile)
+	config := NewEntitlementConfig(login, installationId, appContext.gitURL, appContext.configRepo, appContext.configFile)
 
 	err := config.load(appContext.appTransport)
 	if err != nil {

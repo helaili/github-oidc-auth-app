@@ -1,0 +1,15 @@
+{
+  "comment": "this is at the root of the repo, we can set any property", 
+  "repository": "helaili/test-three-repo",
+  "repository_owner": "helaili",
+  "environment": "development",
+  "scopes": {
+    "repositories": [
+      "codespace-oddity"
+    ],
+    "permissions": {
+      "contents": "write",
+      "organization_administration": "read"
+    }
+  }
+}

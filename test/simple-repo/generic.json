@@ -1,0 +1,14 @@
+{
+  "repository": "helaili/github-oidc-auth-app",
+  "repository_owner": "helaili",
+  "environment": "development",
+  "scopes": {
+    "repositories": [
+      "codespace-oddity"
+    ],
+    "permissions": {
+      "contents": "write",
+      "organization_administration": "read"
+    }
+  }
+}

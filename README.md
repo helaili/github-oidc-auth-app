@@ -34,7 +34,7 @@ flowchart TB
   subgraph inst2 [Installation 2]
     direction TB
     Org2(Organisation 2)
-    ConfigFile2[[Configuration file 2]]
+    ConfigFile2[(Configuration repository 2)]
     Repo2[(Repositories)]
     Config2(Org config)
     Org2-->ConfigFile2
@@ -71,9 +71,9 @@ Those are the environment variables that can be used to configure the app:
 
 `APP_ID`: **Required**. The ID of the GitHub App
 
-`CONFIG_REPO`: **Optional**. The name of the repository where the configuration file is stored. Default to `.github-private`
+`CONFIG_REPO`: **Optional**. The name of the repository where the configuration file is stored. Default to `oidc_entitlements`
 
-`CONFIG_FILE`: **Optional**. The name of the configuration file. Default to `oidc_entitlements.json`
+`CONFIG_FILE`: **Optional**. The name of the configuration file (only when using single file mode).
 
 `GHES_URL`: **Optional**. The URL of the GitHub Enterprise Server in the form of `https://ghes.example.com`. If not provided, the app will use `https://github.com`.
 
@@ -108,8 +108,52 @@ cat private-key.pem | base64
 ## Install the app
 - Install the app on each organisations that will need to be accessed by the workflows. You can do that by following [the instructions](https://docs.github.com/en/apps/maintaining-github-apps/installing-github-apps). Remember to select the repositories that will accessed by the app, including the one that will host the `oidc_entitlements.json` configuration file.
 
-## Create a configuration file
-- Commit an `oidc_entitlements.json` file in the `.github-private` repository (or whatever value you provided to the runtime with the  `CONFIG_REPO` and `CONFIG_FILE` environment variables) of each organisation that will need to be accessed by the workflows. The file should look like below. It is a basically an array of claims to match and the permissions to grant if the claim matches. The claims are the ones provided by the OIDC token and represent properties of the GitHub Actions workflow (along with information about actor, repo, commit...) which needs to retrieve the scoped token. 
+## Create a configuration 
+
+### Repository based configuration
+Within a dedicated repo (defaults to `oidc_entitlements`, otherwise set the `CONFIG_REPO` environment variable accordingly), each JSON file defines a single entitlement, and the folder hierarchy implies a semantic that constrains the content. 
+
+Sample folder hierarchy:
+
+```
+repo/
+├─ organisation/
+│  ├─ administration/
+│  │  ├─ owners/
+│  │  │  ├─ ziggy-stardust/
+│  │  │  ├─ major-tom/
+│  │  │  │  ├─ environments/
+│  │  │  │  │  ├─ development/
+│  │  │  │  │  ├─ production/
+│  │  │  │  │  │  ├─ org-perm-major-tom-production.json
+│  │  │  │  ├─ repositories/
+│  │  │  │  │  ├─ starman/
+│  │  │  │  │  │  ├─ org-perm-major-tom-starman.json
+│  ├─ custom_roles/
+├─ repositories/
+│  ├─ codespace-oddity/
+│  │  ├─ owners/
+│  │  │  ├─ ziggy-stardust/
+│  │  │  ├─ major-tom/
+│  │  │  │  ├─ environments/
+│  │  │  │  │  ├─ development/
+│  │  │  │  │  ├─ production/
+│  │  │  │  │  │  ├─ repo-perm-major-tom-production.json
+│  │  │  │  ├─ repositories/
+│  │  │  │  │  ├─ starman/
+│  │  │  │  │  │  ├─ repo-perm-major-tom-starman-1.json
+│  │  │  │  │  │  ├─ repo-perm-major-tom-starman-2.json
+│  │  │  │  ├─ repo-perm-major-tom.json
+│  │  ├─ repo-perm-codespace-oddity-1.json
+│  │  ├─ repo-perm-codespace-oddity-2.json
+│  ├─ commit-on-mars/ 
+├─ generic.json
+├─ README.md
+
+```
+
+### Single file configuration
+In this mode, the whole configuration is stored in a single file. Commit a JSON file in the repository and set the `CONFIG_REPO` and `CONFIG_FILE` environment variables accordingly. The file should look like below. It is a basically an array of claims to match and the permissions to grant if the claim matches. The claims are the ones provided by the OIDC token and represent properties of the GitHub Actions workflow (along with information about actor, repo, commit...) which needs to retrieve the scoped token. 
 
 ```json
 [
@@ -177,7 +221,8 @@ cat private-key.pem | base64
 ]
 ```
  
- If a set of claim matches several entries, the permissions will be the sum of the permissions of all the matching entries. For instance, a job targeting the `production` environment in a `public` repository named `talkingheads/road-to-nowhere` will get the following entitlements:
+ If a set of claim matches several entries, the permissions will be the sum of the permissions of all the matching entries. For instance, a job from the `talkingheads/road-to-nowhere` `public` repository targeting the `production` environment will get the entitlements below which are the sum of the two matching configuration objects from the array above.
+ 
  
  ```json
 {
@@ -191,6 +236,8 @@ cat private-key.pem | base64
     }
 }
  ```
+
+### Set App permissions
 
 Remember that the app you created needs to have the permissions of all the different scoped tokens it will generate. Therefore, with the configuration above, the app  will need to have the following permissions:
 ```yaml

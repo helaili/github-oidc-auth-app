@@ -1,0 +1,10 @@
+{
+  "repository": "helaili/test-repo",
+  "environment": "development",
+  "scopes": {
+    "permissions": {
+      "contents": "write",
+      "organization_administration": "read"
+    }
+  }
+}

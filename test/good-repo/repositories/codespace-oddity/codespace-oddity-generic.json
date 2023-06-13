@@ -1,0 +1,11 @@
+{
+  "repository": "helaili/test-two-repo",
+  "repository_owner": "helaili",
+  "environment": "development",
+  "scopes": {
+    "permissions": {
+      "contents": "write",
+      "organization_administration": "read"
+    }
+  }
+}

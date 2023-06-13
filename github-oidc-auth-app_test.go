@@ -40,31 +40,33 @@ var claims jwt.MapClaims = jwt.MapClaims{
 
 func TestExactRegexEntitlement(t *testing.T) {
 	entitlement := Entitlement{
-		Actor:             "helaili",
-		ActorId:           2787414,
-		Audience:          "api://ActionsOIDCGateway",
-		BaseRef:           "",
 		Environment:       "production",
-		EventName:         "workflow_dispatch",
-		HeadRef:           "",
-		Issuer:            "https://token.actions.githubusercontent.com",
-		JobWokflowRef:     "helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main",
-		JobWokflowSha:     "44216e5ae99f3653290b60b7f995bfe1c0f3aba0",
-		Ref:               "refs/heads/main",
-		RefType:           "branch",
 		Repository:        "helaili/github-oidc-auth-app",
 		RepositoryId:      630836305,
 		RepositoryOwner:   "helaili",
 		RepositoryOwnerId: 2787414,
-		RunAttempt:        1,
-		RunId:             4779904167,
-		RunNumber:         12,
-		RunnerEnvironment: "github-hosted",
-		Subject:           "repo:helaili/github-oidc-auth-app:ref:refs/heads/main",
-		Visibility:        "public",
-		Workflow:          "Manual Test Workflow",
-		WorkflowRef:       "helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main",
-		WorkflowSha:       "44216e5ae99f3653290b60b7f995bfe1c0f3aba0",
+		BasicEntitlement: BasicEntitlement{
+			Actor:             "helaili",
+			ActorId:           2787414,
+			Audience:          "api://ActionsOIDCGateway",
+			BaseRef:           "",
+			EventName:         "workflow_dispatch",
+			HeadRef:           "",
+			Issuer:            "https://token.actions.githubusercontent.com",
+			JobWokflowRef:     "helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main",
+			JobWokflowSha:     "44216e5ae99f3653290b60b7f995bfe1c0f3aba0",
+			Ref:               "refs/heads/main",
+			RefType:           "branch",
+			RunAttempt:        1,
+			RunId:             4779904167,
+			RunNumber:         12,
+			RunnerEnvironment: "github-hosted",
+			Subject:           "repo:helaili/github-oidc-auth-app:ref:refs/heads/main",
+			Visibility:        "public",
+			Workflow:          "Manual Test Workflow",
+			WorkflowRef:       "helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main",
+			WorkflowSha:       "44216e5ae99f3653290b60b7f995bfe1c0f3aba0",
+		},
 	}
 	entitlementRegex := entitlement.regexString()
 	if entitlementRegex != "^actor:helaili,actor_id:2787414,aud:api://ActionsOIDCGateway,base_ref:.*,environment:production,event_name:workflow_dispatch,head_ref:.*,iss:https://token.actions.githubusercontent.com,job_workflow_ref:helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main,job_workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0,ref:refs/heads/main,ref_type:branch,repository:helaili/github-oidc-auth-app,repository_id:630836305,repository_owner:helaili,repository_owner_id:2787414,repository_visibility:public,run_attempt:1,run_id:4779904167,run_number:12,runner_environment:github-hosted,sub:repo:helaili/github-oidc-auth-app:ref:refs/heads/main,workflow:Manual Test Workflow,workflow_ref:helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main,workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0$" {
@@ -75,10 +77,12 @@ func TestExactRegexEntitlement(t *testing.T) {
 func TestFuzzyRegexEntitlement(t *testing.T) {
 	entitlement := Entitlement{
 		Environment:     "production",
-		EventName:       "workflow_dispatch",
-		Ref:             "refs/heads/main",
 		RepositoryOwner: "helaili",
-		Visibility:      "public",
+		BasicEntitlement: BasicEntitlement{
+			EventName:  "workflow_dispatch",
+			Ref:        "refs/heads/main",
+			Visibility: "public",
+		},
 	}
 	entitlementRegex := entitlement.regexString()
 	if entitlementRegex != "^actor:.*,actor_id:.*,aud:.*,base_ref:.*,environment:production,event_name:workflow_dispatch,head_ref:.*,iss:.*,job_workflow_ref:.*,job_workflow_sha:.*,ref:refs/heads/main,ref_type:.*,repository:.*,repository_id:.*,repository_owner:helaili,repository_owner_id:.*,repository_visibility:public,run_attempt:.*,run_id:.*,run_number:.*,runner_environment:.*,sub:.*,workflow:.*,workflow_ref:.*,workflow_sha:.*$" {
