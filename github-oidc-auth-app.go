@@ -27,17 +27,24 @@ func main() {
 		log.Fatal("Wrong format for APP_ID")
 	}
 
-	var webhook_secret, configRepo, configFile string
+	var webhook_secret, configFile string
 
 	if webhook_secret = os.Getenv("WEBHOOK_SECRET"); webhook_secret == "" {
 		log.Fatal("WEBHOOK_SECRET is not set")
 	}
 
-	if configRepo = os.Getenv("CONFIG_REPO"); configRepo == "" {
+	configRepo := os.Getenv("CONFIG_REPO")
+	if configRepo == "" {
+		log.Println("CONFIG_REPO is not set, using default value 'oidc_entitlements'")
 		configRepo = "oidc_entitlements"
+	} else {
+		log.Printf("CONFIG_REPO set to '%s'", configRepo)
 	}
 
 	configFile = os.Getenv("CONFIG_FILE")
+	if configFile != "" {
+		log.Printf("CONFIG_FILE set to '%s'", configFile)
+	}
 
 	appTransport, err := ghinstallation.NewAppsTransport(http.DefaultTransport, app_id, private_key)
 	if err != nil {
