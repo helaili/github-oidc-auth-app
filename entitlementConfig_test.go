@@ -16,8 +16,8 @@ func TestStripAllPermissionsBut(t *testing.T) {
 	config := NewEntitlementConfig("test", 1, "https://github.com", "test", "")
 
 	srcEntitlement := Entitlement{
-		Repository:      "helaili/github-oidc-auth-app",
-		RepositoryOwner: "helaili",
+		Repository:      "major-tom/starman",
+		RepositoryOwner: "major-tom",
 		Environment:     "development",
 		BasicEntitlement: BasicEntitlement{
 			Scopes: Scope{
@@ -32,8 +32,8 @@ func TestStripAllPermissionsBut(t *testing.T) {
 	}
 
 	expectedEntitlement := Entitlement{
-		Repository:      "helaili/github-oidc-auth-app",
-		RepositoryOwner: "helaili",
+		Repository:      "major-tom/starman",
+		RepositoryOwner: "major-tom",
 		Environment:     "development",
 		BasicEntitlement: BasicEntitlement{
 			Scopes: Scope{
@@ -61,8 +61,8 @@ func TestStripAllOrgPermissions(t *testing.T) {
 	config := NewEntitlementConfig("test", 1, "https://github.com", "test", "")
 
 	srcEntitlement := Entitlement{
-		Repository:      "helaili/github-oidc-auth-app",
-		RepositoryOwner: "helaili",
+		Repository:      "major-tom/starman",
+		RepositoryOwner: "major-tom",
 		Environment:     "development",
 		BasicEntitlement: BasicEntitlement{
 			Scopes: Scope{
@@ -77,8 +77,8 @@ func TestStripAllOrgPermissions(t *testing.T) {
 	}
 
 	expectedEntitlement := Entitlement{
-		Repository:      "helaili/github-oidc-auth-app",
-		RepositoryOwner: "helaili",
+		Repository:      "major-tom/starman",
+		RepositoryOwner: "major-tom",
 		Environment:     "development",
 		BasicEntitlement: BasicEntitlement{
 			Scopes: Scope{
@@ -118,8 +118,8 @@ func TestSimpleRepoConfig(t *testing.T) {
 
 	expectedEntitlements := []Entitlement{
 		{
-			Repository:      "helaili/github-oidc-auth-app",
-			RepositoryOwner: "helaili",
+			Repository:      "major-tom/starman",
+			RepositoryOwner: "major-tom",
 			Environment:     "development",
 			BasicEntitlement: BasicEntitlement{
 				Scopes: Scope{
@@ -160,8 +160,8 @@ func TestGoodRepoConfig(t *testing.T) {
 	expectedEntitlements := []Entitlement{
 		// from test/good-repo/generic.json
 		{
-			Repository:      "helaili/test-three-repo",
-			RepositoryOwner: "helaili",
+			Repository:      "major-tom/test-three-repo",
+			RepositoryOwner: "major-tom",
 			Environment:     "development",
 			BasicEntitlement: BasicEntitlement{
 				Scopes: Scope{
@@ -175,9 +175,9 @@ func TestGoodRepoConfig(t *testing.T) {
 				},
 			},
 		},
-		// from test/good-repo/organization/administration/owners/helaili/environments/development/admin_read.json
+		// from test/good-repo/organization/administration/owners/major-tom/environments/development/admin_read.json
 		{
-			RepositoryOwner: "helaili",
+			RepositoryOwner: "major-tom",
 			Environment:     "development",
 			BasicEntitlement: BasicEntitlement{
 				Scopes: Scope{
@@ -187,10 +187,10 @@ func TestGoodRepoConfig(t *testing.T) {
 				},
 			},
 		},
-		// from test/good-repo/repositories/codespace-oddity/owners/helaili/test-repo-dev.json
+		// from test/good-repo/repositories/codespace-oddity/owners/major-tom/test-repo-dev.json
 		{
-			Repository:      "helaili/test-two-repo",
-			RepositoryOwner: "helaili",
+			Repository:      "major-tom/test-two-repo",
+			RepositoryOwner: "major-tom",
 			Environment:     "development",
 			BasicEntitlement: BasicEntitlement{
 				Scopes: Scope{
@@ -201,9 +201,9 @@ func TestGoodRepoConfig(t *testing.T) {
 				},
 			},
 		},
-		// from test/good-repo/repositories/codespace-oddity/owners/helaili/environments/development/test-workflow.json
+		// from test/good-repo/repositories/codespace-oddity/owners/major-tom/environments/development/test-workflow.json
 		{
-			RepositoryOwner: "helaili",
+			RepositoryOwner: "major-tom",
 			Environment:     "development",
 			BasicEntitlement: BasicEntitlement{
 				Workflow: "Workflow 1",
@@ -215,10 +215,10 @@ func TestGoodRepoConfig(t *testing.T) {
 				},
 			},
 		},
-		// from test/good-repo/repositories/codespace-oddity/owners/helaili/repositories/github-oidc-auth-app/entitlements.json
+		// from test/good-repo/repositories/codespace-oddity/owners/major-tom/repositories/starman/entitlements.json
 		{
-			Repository:      "helaili/github-oidc-auth-app",
-			RepositoryOwner: "helaili",
+			Repository:      "major-tom/starman",
+			RepositoryOwner: "major-tom",
 			Environment:     "development",
 			BasicEntitlement: BasicEntitlement{
 				Scopes: Scope{
@@ -231,8 +231,8 @@ func TestGoodRepoConfig(t *testing.T) {
 		},
 		// test/good-repo/repositories/codespace-oddity/codespace-oddity-generic.json
 		{
-			Repository:      "helaili/test-repo",
-			RepositoryOwner: "helaili",
+			Repository:      "major-tom/test-repo",
+			RepositoryOwner: "major-tom",
 			Environment:     "development",
 			BasicEntitlement: BasicEntitlement{
 				Scopes: Scope{
@@ -271,10 +271,10 @@ func TestDeepEnvRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/deep-env-repo/repositories/codespace-oddity/owners/helaili/repositories/github-oidc-auth-app/environments/production/test-workflow.json
+		// from test/deep-env-repo/repositories/codespace-oddity/owners/major-tom/repositories/starman/environments/production/test-workflow.json
 		{
-			Repository:      "helaili/github-oidc-auth-app",
-			RepositoryOwner: "helaili",
+			Repository:      "major-tom/starman",
+			RepositoryOwner: "major-tom",
 			Environment:     "production",
 			BasicEntitlement: BasicEntitlement{
 				Workflow: "Workflow 1",
@@ -314,10 +314,10 @@ func TestDeepRepoRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/deep-repo-repo/repositories/codespace-oddity/environments/production/owners/helaili/repositories/github-oidc-auth-app/test-workflow.json
+		// from test/deep-repo-repo/repositories/codespace-oddity/environments/production/owners/major-tom/repositories/starman/test-workflow.json
 		{
-			Repository:      "helaili/github-oidc-auth-app",
-			RepositoryOwner: "helaili",
+			Repository:      "major-tom/starman",
+			RepositoryOwner: "major-tom",
 			Environment:     "production",
 			BasicEntitlement: BasicEntitlement{
 				Workflow: "Workflow 1",
@@ -357,9 +357,9 @@ func TestOwnerEnvRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/owner-env-repo/owners/helaili/environments/production/test-workflow.json
+		// from test/owner-env-repo/owners/major-tom/environments/production/test-workflow.json
 		{
-			RepositoryOwner: "helaili",
+			RepositoryOwner: "major-tom",
 			Environment:     "production",
 			BasicEntitlement: BasicEntitlement{
 				Workflow: "Workflow 1",
@@ -399,7 +399,7 @@ func TestRepoRepoRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/repo-repo-repo/repositories/codespace-oddity/repositories/github-oidc-auth-app/test-workflow.json
+		// from test/repo-repo-repo/repositories/codespace-oddity/repositories/starman/test-workflow.json
 		{
 			BasicEntitlement: BasicEntitlement{
 				Workflow: "Workflow 1",
@@ -518,10 +518,10 @@ func TestEnvOwnersRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/env-owners-repo-repo/environments/production/owners/helaili/repositories/github-oidc-auth-app/test-workflow.json
+		// from test/env-owners-repo-repo/environments/production/owners/major-tom/repositories/starman/test-workflow.json
 		{
-			Repository:      "helaili/github-oidc-auth-app",
-			RepositoryOwner: "helaili",
+			Repository:      "major-tom/starman",
+			RepositoryOwner: "major-tom",
 			Environment:     "production",
 			BasicEntitlement: BasicEntitlement{
 				Workflow: "Workflow 1",

@@ -205,7 +205,6 @@ func (config *EntitlementConfig) loadFolder(path string, files []fs.DirEntry, is
 
 			orgPermissionName := orgRegex.FindStringSubmatch(fullPath)
 			if orgPermissionName != nil {
-				log.Printf("org permission name: %s", orgPermissionName[1])
 				// we are under the orgnization/<permission> folder, so we can use the folder name as the unique permission name
 				config.stripAllPermissionsBut(fmt.Sprintf("organization_%s", orgPermissionName[1]), &entitlement)
 			} else if !isRoot {

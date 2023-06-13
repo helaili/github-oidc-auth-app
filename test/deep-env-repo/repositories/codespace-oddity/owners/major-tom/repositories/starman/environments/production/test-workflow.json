@@ -1,7 +1,5 @@
 {
-  "repository": "major-tom/test-two-repo",
-  "repository_owner": "major-tom",
-  "environment": "development",
+  "workflow": "Workflow 1",
   "scopes": {
     "permissions": {
       "contents": "write",

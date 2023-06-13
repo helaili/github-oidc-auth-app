@@ -1,11 +1,11 @@
 [
    {
-      "actor": "helaili",
+      "actor": "major-tom",
       "environment": "hell",
       "event_name": "workflow_dispatch",
       "ref": "refs/heads/main",
-      "repository": "helaili/github-oidc-auth-app",
-      "repository_owner": "helaili",
+      "repository": "major-tom/starman",
+      "repository_owner": "major-tom",
       "repository_visibility": "public",
       "workflow": "Manual Test Workflow",
       "scopes": {

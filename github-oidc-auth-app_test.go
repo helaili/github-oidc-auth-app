@@ -11,7 +11,7 @@ import (
 )
 
 var claims jwt.MapClaims = jwt.MapClaims{
-	"actor":                 "helaili",
+	"actor":                 "major-tom",
 	"actor_id":              2787414,
 	"aud":                   "api://ActionsOIDCGateway",
 	"base_ref":              "",
@@ -19,41 +19,41 @@ var claims jwt.MapClaims = jwt.MapClaims{
 	"event_name":            "workflow_dispatch",
 	"head_ref":              "",
 	"iss":                   "https://token.actions.githubusercontent.com",
-	"job_workflow_ref":      "helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main",
+	"job_workflow_ref":      "major-tom/starman/.github/workflows/manual-test.yml@refs/heads/main",
 	"job_workflow_sha":      "44216e5ae99f3653290b60b7f995bfe1c0f3aba0",
 	"ref":                   "refs/heads/main",
 	"ref_type":              "branch",
-	"repository":            "helaili/github-oidc-auth-app",
+	"repository":            "major-tom/starman",
 	"repository_id":         630836305,
-	"repository_owner":      "helaili",
+	"repository_owner":      "major-tom",
 	"repository_owner_id":   2787414,
 	"repository_visibility": "public",
 	"run_attempt":           1,
 	"run_id":                4779904167,
 	"run_number":            12,
 	"runner_environment":    "github-hosted",
-	"sub":                   "repo:helaili/github-oidc-auth-app:ref:refs/heads/main",
+	"sub":                   "repo:major-tom/starman:ref:refs/heads/main",
 	"workflow":              "Manual Test Workflow",
-	"workflow_ref":          "helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main",
+	"workflow_ref":          "major-tom/starman/.github/workflows/manual-test.yml@refs/heads/main",
 	"workflow_sha":          "44216e5ae99f3653290b60b7f995bfe1c0f3aba0",
 }
 
 func TestExactRegexEntitlement(t *testing.T) {
 	entitlement := Entitlement{
 		Environment:       "production",
-		Repository:        "helaili/github-oidc-auth-app",
+		Repository:        "major-tom/starman",
 		RepositoryId:      630836305,
-		RepositoryOwner:   "helaili",
+		RepositoryOwner:   "major-tom",
 		RepositoryOwnerId: 2787414,
 		BasicEntitlement: BasicEntitlement{
-			Actor:             "helaili",
+			Actor:             "major-tom",
 			ActorId:           2787414,
 			Audience:          "api://ActionsOIDCGateway",
 			BaseRef:           "",
 			EventName:         "workflow_dispatch",
 			HeadRef:           "",
 			Issuer:            "https://token.actions.githubusercontent.com",
-			JobWokflowRef:     "helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main",
+			JobWokflowRef:     "major-tom/starman/.github/workflows/manual-test.yml@refs/heads/main",
 			JobWokflowSha:     "44216e5ae99f3653290b60b7f995bfe1c0f3aba0",
 			Ref:               "refs/heads/main",
 			RefType:           "branch",
@@ -61,23 +61,23 @@ func TestExactRegexEntitlement(t *testing.T) {
 			RunId:             4779904167,
 			RunNumber:         12,
 			RunnerEnvironment: "github-hosted",
-			Subject:           "repo:helaili/github-oidc-auth-app:ref:refs/heads/main",
+			Subject:           "repo:major-tom/starman:ref:refs/heads/main",
 			Visibility:        "public",
 			Workflow:          "Manual Test Workflow",
-			WorkflowRef:       "helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main",
+			WorkflowRef:       "major-tom/starman/.github/workflows/manual-test.yml@refs/heads/main",
 			WorkflowSha:       "44216e5ae99f3653290b60b7f995bfe1c0f3aba0",
 		},
 	}
 	entitlementRegex := entitlement.regexString()
-	if entitlementRegex != "^actor:helaili,actor_id:2787414,aud:api://ActionsOIDCGateway,base_ref:.*,environment:production,event_name:workflow_dispatch,head_ref:.*,iss:https://token.actions.githubusercontent.com,job_workflow_ref:helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main,job_workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0,ref:refs/heads/main,ref_type:branch,repository:helaili/github-oidc-auth-app,repository_id:630836305,repository_owner:helaili,repository_owner_id:2787414,repository_visibility:public,run_attempt:1,run_id:4779904167,run_number:12,runner_environment:github-hosted,sub:repo:helaili/github-oidc-auth-app:ref:refs/heads/main,workflow:Manual Test Workflow,workflow_ref:helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main,workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0$" {
-		t.Error("Expected entitlementRegex to be ^actor:helaili,actor_id:2787414,aud:api://ActionsOIDCGateway,base_ref:.*,environment:production,event_name:workflow_dispatch,head_ref:.*,iss:https://token.actions.githubusercontent.com,job_workflow_ref:helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main,job_workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0,ref:refs/heads/main,ref_type:branch,repository:helaili/github-oidc-auth-app,repository_id:630836305,repository_owner:helaili,repository_owner_id:2787414,repository_visibility:public,run_attempt:1,run_id:4779904167,run_number:12,runner_environment:github-hosted,sub:repo:helaili/github-oidc-auth-app:ref:refs/heads/main,workflow:Manual Test Workflow,workflow_ref:helaili/github-oidc-auth-app/.github/workflows/manual-test.yml@refs/heads/main,workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0$, but got", entitlementRegex)
+	if entitlementRegex != "^actor:major-tom,actor_id:2787414,aud:api://ActionsOIDCGateway,base_ref:.*,environment:production,event_name:workflow_dispatch,head_ref:.*,iss:https://token.actions.githubusercontent.com,job_workflow_ref:major-tom/starman/.github/workflows/manual-test.yml@refs/heads/main,job_workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0,ref:refs/heads/main,ref_type:branch,repository:major-tom/starman,repository_id:630836305,repository_owner:major-tom,repository_owner_id:2787414,repository_visibility:public,run_attempt:1,run_id:4779904167,run_number:12,runner_environment:github-hosted,sub:repo:major-tom/starman:ref:refs/heads/main,workflow:Manual Test Workflow,workflow_ref:major-tom/starman/.github/workflows/manual-test.yml@refs/heads/main,workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0$" {
+		t.Error("Expected entitlementRegex to be ^actor:major-tom,actor_id:2787414,aud:api://ActionsOIDCGateway,base_ref:.*,environment:production,event_name:workflow_dispatch,head_ref:.*,iss:https://token.actions.githubusercontent.com,job_workflow_ref:major-tom/starman/.github/workflows/manual-test.yml@refs/heads/main,job_workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0,ref:refs/heads/main,ref_type:branch,repository:major-tom/starman,repository_id:630836305,repository_owner:major-tom,repository_owner_id:2787414,repository_visibility:public,run_attempt:1,run_id:4779904167,run_number:12,runner_environment:github-hosted,sub:repo:major-tom/starman:ref:refs/heads/main,workflow:Manual Test Workflow,workflow_ref:major-tom/starman/.github/workflows/manual-test.yml@refs/heads/main,workflow_sha:44216e5ae99f3653290b60b7f995bfe1c0f3aba0$, but got", entitlementRegex)
 	}
 }
 
 func TestFuzzyRegexEntitlement(t *testing.T) {
 	entitlement := Entitlement{
 		Environment:     "production",
-		RepositoryOwner: "helaili",
+		RepositoryOwner: "major-tom",
 		BasicEntitlement: BasicEntitlement{
 			EventName:  "workflow_dispatch",
 			Ref:        "refs/heads/main",
@@ -85,8 +85,8 @@ func TestFuzzyRegexEntitlement(t *testing.T) {
 		},
 	}
 	entitlementRegex := entitlement.regexString()
-	if entitlementRegex != "^actor:.*,actor_id:.*,aud:.*,base_ref:.*,environment:production,event_name:workflow_dispatch,head_ref:.*,iss:.*,job_workflow_ref:.*,job_workflow_sha:.*,ref:refs/heads/main,ref_type:.*,repository:.*,repository_id:.*,repository_owner:helaili,repository_owner_id:.*,repository_visibility:public,run_attempt:.*,run_id:.*,run_number:.*,runner_environment:.*,sub:.*,workflow:.*,workflow_ref:.*,workflow_sha:.*$" {
-		t.Error("Expected entitlementRegex to be ^actor:.*,actor_id:.*,aud:.*,base_ref:.*,environment:production,event_name:workflow_dispatch,head_ref:.*,iss:.*,job_workflow_ref:.*,job_workflow_sha:.*,ref:refs/heads/main,ref_type:.*,repository:.*,repository_id:.*,repository_owner:helaili,repository_owner_id:.*,repository_visibility:public,run_attempt:.*,run_id:.*,run_number:.*,runner_environment:.*,sub:.*,workflow:.*,workflow_ref:.*,workflow_sha:.*$, but got", entitlementRegex)
+	if entitlementRegex != "^actor:.*,actor_id:.*,aud:.*,base_ref:.*,environment:production,event_name:workflow_dispatch,head_ref:.*,iss:.*,job_workflow_ref:.*,job_workflow_sha:.*,ref:refs/heads/main,ref_type:.*,repository:.*,repository_id:.*,repository_owner:major-tom,repository_owner_id:.*,repository_visibility:public,run_attempt:.*,run_id:.*,run_number:.*,runner_environment:.*,sub:.*,workflow:.*,workflow_ref:.*,workflow_sha:.*$" {
+		t.Error("Expected entitlementRegex to be ^actor:.*,actor_id:.*,aud:.*,base_ref:.*,environment:production,event_name:workflow_dispatch,head_ref:.*,iss:.*,job_workflow_ref:.*,job_workflow_sha:.*,ref:refs/heads/main,ref_type:.*,repository:.*,repository_id:.*,repository_owner:major-tom,repository_owner_id:.*,repository_visibility:public,run_attempt:.*,run_id:.*,run_number:.*,runner_environment:.*,sub:.*,workflow:.*,workflow_ref:.*,workflow_sha:.*$, but got", entitlementRegex)
 	}
 }
 

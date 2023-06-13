@@ -1,6 +1,7 @@
 create-azure-fed-creds-*.sh
 github-oidc-auth-app
-.env*
+.env
+.env.*
 !.env.sample
 .DS_Store
 bin

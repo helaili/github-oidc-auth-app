@@ -1,6 +1,6 @@
 {
-  "repository": "helaili/github-oidc-auth-app",
-  "repository_owner": "helaili",
+  "repository": "major-tom/starman",
+  "repository_owner": "major-tom",
   "environment": "development",
   "scopes": {
     "repositories": [
