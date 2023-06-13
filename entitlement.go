@@ -2,12 +2,11 @@ package main
 
 import "fmt"
 
-type Entitlement struct {
+type BasicEntitlement struct {
 	Actor             string `json:"actor,omitempty"`
 	ActorId           int64  `json:"actor_id,omitempty"`
 	Audience          string `json:"aud,omitempty"`
 	BaseRef           string `json:"base_ref,omitempty"`
-	Environment       string `json:"environment,omitempty"`
 	EventName         string `json:"event_name,omitempty"`
 	HeadRef           string `json:"head_ref,omitempty"`
 	Issuer            string `json:"iss,omitempty"`
@@ -15,10 +14,6 @@ type Entitlement struct {
 	JobWokflowSha     string `json:"job_workflow_sha,omitempty"`
 	Ref               string `json:"ref,omitempty"`
 	RefType           string `json:"ref_type,omitempty"`
-	Repository        string `json:"repository,omitempty"`
-	RepositoryId      int64  `json:"repository_id,omitempty"`
-	RepositoryOwner   string `json:"repository_owner,omitempty"`
-	RepositoryOwnerId int64  `json:"repository_owner_id,omitempty"`
 	RunAttempt        int64  `json:"run_attempt,omitempty"`
 	RunId             int64  `json:"run_id,omitempty"`
 	RunNumber         int64  `json:"run_number,omitempty"`
@@ -29,6 +24,15 @@ type Entitlement struct {
 	WorkflowRef       string `json:"workflow_ref,omitempty"`
 	WorkflowSha       string `json:"workflow_sha,omitempty"`
 	Scopes            Scope  `json:"scopes"`
+}
+
+type Entitlement struct {
+	BasicEntitlement
+	Environment       string `json:"environment,omitempty"`
+	Repository        string `json:"repository,omitempty"`
+	RepositoryId      int64  `json:"repository_id,omitempty"`
+	RepositoryOwner   string `json:"repository_owner,omitempty"`
+	RepositoryOwnerId int64  `json:"repository_owner_id,omitempty"`
 }
 
 func (e Entitlement) regexString() string {

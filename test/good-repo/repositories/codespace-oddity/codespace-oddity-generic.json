@@ -1,0 +1,11 @@
+{
+  "repository": "major-tom/test-two-repo",
+  "repository_owner": "major-tom",
+  "environment": "development",
+  "scopes": {
+    "permissions": {
+      "contents": "write",
+      "organization_administration": "read"
+    }
+  }
+}

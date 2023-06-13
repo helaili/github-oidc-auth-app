@@ -1,0 +1,15 @@
+{
+  "comment": "this is at the root of the repo, we can set any property", 
+  "repository": "major-tom/test-three-repo",
+  "repository_owner": "major-tom",
+  "environment": "development",
+  "scopes": {
+    "repositories": [
+      "codespace-oddity"
+    ],
+    "permissions": {
+      "contents": "write",
+      "organization_administration": "read"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "comment": "the repository will be stripped from the scope as it is provided by the path",  
+  "environment": "development",
+  "scopes": {
+    "permissions": {
+      "contents": "write",
+      "organization_administration": "read"
+    },
+    "repositories": [
+      "wwwwwwwww" 
+    ]
+  }
+}

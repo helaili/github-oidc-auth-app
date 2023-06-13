@@ -27,32 +27,33 @@ func main() {
 		log.Fatal("Wrong format for APP_ID")
 	}
 
-	var webhook_secret, configRepo, configFile, wellKnownURL string
+	var webhook_secret, configRepo, configFile string
 
 	if webhook_secret = os.Getenv("WEBHOOK_SECRET"); webhook_secret == "" {
 		log.Fatal("WEBHOOK_SECRET is not set")
 	}
 
 	if configRepo = os.Getenv("CONFIG_REPO"); configRepo == "" {
-		configRepo = ".github-private"
+		configRepo = "oidc_entitlements"
 	}
-	if configFile = os.Getenv("CONFIG_FILE"); configFile == "" {
-		configFile = "oidc_entitlements.json"
-	}
+
+	configFile = os.Getenv("CONFIG_FILE")
 
 	appTransport, err := ghinstallation.NewAppsTransport(http.DefaultTransport, app_id, private_key)
 	if err != nil {
 		log.Fatal("Failed to initialize GitHub App transport:", err)
 	}
 
+	wellKnownURL := "https://token.actions.githubusercontent.com/.well-known/jwks"
+	gitUrl := "https://github.com"
+
 	if ghesUrl := os.Getenv("GHES_URL"); ghesUrl != "" {
 		appTransport.BaseURL = fmt.Sprintf("%s/api/v3", ghesUrl)
 		wellKnownURL = fmt.Sprintf("%s/_services/token/.well-known/jwks", ghesUrl)
-	} else {
-		wellKnownURL = "https://token.actions.githubusercontent.com/.well-known/jwks"
+		gitUrl = ghesUrl
 	}
 
-	appContext := NewAppContext(time.Now(), appTransport, webhook_secret, configRepo, configFile, wellKnownURL)
+	appContext := NewAppContext(time.Now(), appTransport, webhook_secret, configRepo, configFile, wellKnownURL, gitUrl)
 
 	fmt.Println("loading config cache")
 	err = appContext.loadConfigs()
