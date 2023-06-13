@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/google/go-github/v52/github"
+	"github.com/google/go-github/v53/github"
 )
 
 func TestStripAllPermissionsBut(t *testing.T) {
@@ -477,7 +477,48 @@ func TestEnvRepoRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/env-repo/environments/production/test-workflow.json
+		// from test/env-repo-repo/environments/production/repositories/codespace-oddity/test-workflow.json
+		{
+			Environment: "production",
+			BasicEntitlement: BasicEntitlement{
+				Workflow: "Workflow 1",
+				Scopes: Scope{
+					Repositories: []string{
+						"codespace-oddity",
+					},
+					Permissions: github.InstallationPermissions{
+						Contents: &write,
+					},
+				},
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(expectedEntitlements, config.Entitlements) {
+		expectedEntitlementsJson, _ := json.MarshalIndent(expectedEntitlements, "", "  ")
+		gotEntitlementsJson, _ := json.MarshalIndent(config.Entitlements, "", "  ")
+		t.Errorf("Expected entitlements to be %s, but got %v", string(expectedEntitlementsJson), string(gotEntitlementsJson))
+	}
+}
+
+func TestEnvOwnersRepoConfig(t *testing.T) {
+	path := "test/env-owners-repo-repo"
+
+	config := NewEntitlementConfig("test", 1, "https://github.com", "test", "")
+
+	files, err := os.ReadDir(path)
+	if err != nil {
+		t.Error(err)
+	}
+	err = config.loadFolder(path, files, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	write := "write"
+
+	expectedEntitlements := []Entitlement{
+		// from test/env-owners-repo-repo/environments/production/owners/helaili/repositories/github-oidc-auth-app/test-workflow.json
 		{
 			Repository:      "helaili/github-oidc-auth-app",
 			RepositoryOwner: "helaili",
@@ -487,6 +528,44 @@ func TestEnvRepoRepoConfig(t *testing.T) {
 				Scopes: Scope{
 					Permissions: github.InstallationPermissions{
 						Contents: &write,
+					},
+				},
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(expectedEntitlements, config.Entitlements) {
+		expectedEntitlementsJson, _ := json.MarshalIndent(expectedEntitlements, "", "  ")
+		gotEntitlementsJson, _ := json.MarshalIndent(config.Entitlements, "", "  ")
+		t.Errorf("Expected entitlements to be %s, but got %v", string(expectedEntitlementsJson), string(gotEntitlementsJson))
+	}
+}
+
+func TestEnvOrganizationRepoConfig(t *testing.T) {
+	path := "test/env-organization-repo"
+
+	config := NewEntitlementConfig("test", 1, "https://github.com", "test", "")
+
+	files, err := os.ReadDir(path)
+	if err != nil {
+		t.Error(err)
+	}
+	err = config.loadFolder(path, files, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	write := "write"
+
+	expectedEntitlements := []Entitlement{
+		// from test/env-organization-repo/environments/production/organization/custom_roles/test-workflow.json
+		{
+			Environment: "production",
+			BasicEntitlement: BasicEntitlement{
+				Workflow: "Workflow 1",
+				Scopes: Scope{
+					Permissions: github.InstallationPermissions{
+						OrganizationCustomRoles: &write,
 					},
 				},
 			},

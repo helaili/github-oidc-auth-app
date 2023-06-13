@@ -15,7 +15,7 @@ import (
 	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/go-git/go-git/v5"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/go-github/v52/github"
+	"github.com/google/go-github/v53/github"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -138,10 +138,12 @@ func (config *EntitlementConfig) stripAllOrgPermissions(entitlement *Entitlement
 
 func (config *EntitlementConfig) loadFolder(path string, files []fs.DirEntry, isRoot bool) error {
 	// Regex to find the section right after /repositories/ in the path
-	// repoRegex := regexp.MustCompile(`.*\/repositories\/([^\/]+)\/`)
-	repoRegex := regexp.MustCompile(`\/repositories\/([^\/]+)\/`)
+	// targetRepoRegex := regexp.MustCompile(`.*\/repositories\/([^\/]+)\/`)
+	targetRepoRegex := regexp.MustCompile(`\/repositories\/([^\/]+)\/`)
 	// Regex to find the section right after /owners/ in the path
 	ownerRegex := regexp.MustCompile(`.*\/owners\/([^\/]+)\/`)
+	// Regex to find the section right after /owners/xxxx/repositories in the path
+	sourceRepoRegex := regexp.MustCompile(`\/owners\/[^\/]+\/repositories\/([^\/]+)\/`)
 	// Regex to find the section right after /owners/ in the path
 	envRegex := regexp.MustCompile(`.*\/environments\/([^\/]+)\/`)
 	// Regex to find the section right after /organization/ in the path
@@ -180,15 +182,19 @@ func (config *EntitlementConfig) loadFolder(path string, files []fs.DirEntry, is
 				entitlement.RepositoryOwner = ownerName[1]
 			}
 
-			repoName := repoRegex.FindAllStringSubmatch(fullPath, 2)
+			sourceRepoName := sourceRepoRegex.FindStringSubmatch(fullPath)
+			if sourceRepoName != nil && entitlement.RepositoryOwner != "" {
+				// a client repository name is present in the path, so we can use it as the repository full name (owner/name) in the claims
+				entitlement.Repository = fmt.Sprintf("%s/%s", entitlement.RepositoryOwner, sourceRepoName[1])
+			}
+
+			// Removing the /owners/xxxx/repositories/yyyyy part of the path so that we can fing the target repository name
+			modifiedFullPath := sourceRepoRegex.ReplaceAllString(fullPath, "/")
+			repoName := targetRepoRegex.FindStringSubmatch(modifiedFullPath)
 			if repoName != nil {
 				// A target repository name is present in the path, so we can use it as the repository name in the scope
 				// Any previously set list of repositories is discarded
-				entitlement.Scopes.Repositories = repoName[0][1:]
-				if len(repoName) >= 2 && entitlement.RepositoryOwner != "" {
-					// a client repository name is present in the path, so we can use it as the repository full name (owner/name) in the claims
-					entitlement.Repository = fmt.Sprintf("%s/%s", entitlement.RepositoryOwner, repoName[1][1])
-				}
+				entitlement.Scopes.Repositories = repoName[1:]
 			}
 
 			// an environment is present in the path, so we can use it in the claims
@@ -199,6 +205,7 @@ func (config *EntitlementConfig) loadFolder(path string, files []fs.DirEntry, is
 
 			orgPermissionName := orgRegex.FindStringSubmatch(fullPath)
 			if orgPermissionName != nil {
+				log.Printf("org permission name: %s", orgPermissionName[1])
 				// we are under the orgnization/<permission> folder, so we can use the folder name as the unique permission name
 				config.stripAllPermissionsBut(fmt.Sprintf("organization_%s", orgPermissionName[1]), &entitlement)
 			} else if !isRoot {

@@ -1,0 +1,9 @@
+{
+  "workflow": "Workflow 1",
+  "scopes": {
+    "permissions": {
+      "contents": "write",
+      "organization_custom_roles": "write"
+    }
+  }
+}

@@ -25,7 +25,7 @@ require (
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/oauth2 v0.7.0 // indirect
+	golang.org/x/oauth2 v0.8.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
@@ -36,6 +36,7 @@ require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.3.0
 	github.com/go-git/go-git/v5 v5.7.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/google/go-github/v53 v53.1.0
 	github.com/joho/godotenv v1.5.1 // indirect
 	golang.org/x/text v0.9.0
 )
