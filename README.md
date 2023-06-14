@@ -239,6 +239,19 @@ Sample file content:
 }
 ```
 
+Sample file content for organization permission, e.g: `/organization/administration/entitlement.json`. `organization_administration` will be the only permission set, any other permission will be ignored. 
+
+```json
+{
+    "workflow": "My first worlflow"
+    "scopes": {
+        "permissions": {
+            "organization_administration": "read"
+        }
+    }
+}
+```
+
 ### Single file configuration
 
 In this mode, the whole configuration is stored in a single file. Commit a JSON file in the repository and set the `CONFIG_REPO` and `CONFIG_FILE` environment variables accordingly. The file should look like below. It is a basically an array of claims to match and the permissions to grant if the claim matches. The claims are the ones provided by the OIDC token and represent properties of the GitHub Actions workflow (along with information about actor, repo, commit...) which needs to retrieve the scoped token. 
