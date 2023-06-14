@@ -75,7 +75,6 @@ func (config *EntitlementConfig) load(appTransport *ghinstallation.AppsTransport
 			return err
 		}
 
-		log.Println(token)
 		_, err = git.PlainClone(fmt.Sprintf("/tmp/%s/%s", config.Login, config.Repo), false, &git.CloneOptions{
 			URL:      fmt.Sprintf("%s/%s/%s", config.GitUrl, config.Login, config.Repo),
 			Auth:     &githttp.BasicAuth{Username: "username", Password: token},
