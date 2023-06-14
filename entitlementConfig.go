@@ -14,6 +14,7 @@ import (
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/go-git/go-git/v5"
+	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-github/v53/github"
 	"golang.org/x/text/cases"
@@ -68,8 +69,16 @@ func (config *EntitlementConfig) load(appTransport *ghinstallation.AppsTransport
 		// Need to clean up the download directory before cloning the repo
 		os.RemoveAll(fmt.Sprintf("/tmp/%s/%s", config.Login, config.Repo))
 
-		_, err := git.PlainClone(fmt.Sprintf("/tmp/%s/%s", config.Login, config.Repo), false, &git.CloneOptions{
+		token, err := itr.Token(context.Background())
+		if err != nil {
+			log.Printf("couldn't get token for installation %d on org %s", config.InstallationId, config.Login)
+			return err
+		}
+
+		log.Println(token)
+		_, err = git.PlainClone(fmt.Sprintf("/tmp/%s/%s", config.Login, config.Repo), false, &git.CloneOptions{
 			URL:      fmt.Sprintf("%s/%s/%s", config.GitUrl, config.Login, config.Repo),
+			Auth:     &githttp.BasicAuth{Username: "username", Password: token},
 			Progress: os.Stdout,
 		})
 		if err != nil {
