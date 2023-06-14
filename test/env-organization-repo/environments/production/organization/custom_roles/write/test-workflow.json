@@ -1,0 +1,11 @@
+{
+  "workflow": "Workflow 1",
+  "scopes": {
+    "repositories": [
+      "codespace-oddity"
+    ],
+    "permissions": {
+      "contents": "write"
+    }
+  }
+}

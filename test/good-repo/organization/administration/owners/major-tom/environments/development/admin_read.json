@@ -1,7 +1,0 @@
-{
-  "scopes": {
-    "permissions": {
-      "organization_administration": "read"
-    }
-  }
-}

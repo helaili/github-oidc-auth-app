@@ -45,7 +45,7 @@ func TestStripAllPermissionsBut(t *testing.T) {
 		},
 	}
 
-	config.stripAllPermissionsBut("organization_administration", &srcEntitlement)
+	config.stripAllPermissionsBut("organization_administration", "read", &srcEntitlement)
 
 	if !reflect.DeepEqual(expectedEntitlement, srcEntitlement) {
 		expectedEntitlementJson, _ := json.MarshalIndent(expectedEntitlement, "", "  ")

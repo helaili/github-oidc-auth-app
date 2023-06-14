@@ -154,7 +154,7 @@ This configuration will grant `write` access to the `codespace-oddity` repositor
 - `repositories` when following an `owners` defininition (i.e. `.../owners/major-tom/repositories/starman`): each subfolder defines the name of a repository (within the organization or user) owning a worflow that can request a scoped token.
 - `repositories` when not following an `owners` definition: each subfolder defines the name of the repository within the organization where the app is installed which will be accessible with the scoped token. The app needs to have access to the repository in order to be able to create a scoped token for it.
 - `environments`: each subfolder defines the name of an environment (e.g. `development`, `production`, `staging`, etc.) targeted by the job requesting the scoped token.
-- `organization`: each subfolder defines the name of an organization level permission that will be granted to the scoped token. The name of the folder will be used to build the name of the permission. For example, if the folder is named `administration`, the permission will be `organization_administration`. See the the `properties of permissions` section [here](https://docs.github.com/en/enterprise-cloud@latest/rest/apps/apps?apiVersion=2022-11-28#create-a-scoped-access-token) to see the list of permissions and their values.
+- `organization`: each subfolder defines the name of an organization level permission that will be granted to the scoped token. The name of the folder will be used to build the name of the permission. For example, if the folder is named `administration`, the permission will be `organization_administration`. The subfolder will provide the value of the permission, so it should be one of these values: `read`, `write`, `admin`.  See the the `properties of permissions` section [here](https://docs.github.com/en/enterprise-cloud@latest/rest/apps/apps?apiVersion=2022-11-28#create-a-scoped-access-token) to see the list of permissions and their values. 
 
 Notes: 
 - A file at the root of the repo can defined any permissions for any claim. 
@@ -169,16 +169,17 @@ Sample folder hierarchy:
 repo/
 ├─ organization/
 │  ├─ administration/
-│  │  ├─ owners/
-│  │  │  ├─ ziggy-stardust/
-│  │  │  ├─ major-tom/
-│  │  │  │  ├─ environments/
-│  │  │  │  │  ├─ development/
-│  │  │  │  │  ├─ production/
-│  │  │  │  │  │  ├─ org-perm-major-tom-production.json
-│  │  │  │  ├─ repositories/
-│  │  │  │  │  ├─ starman/
-│  │  │  │  │  │  ├─ org-perm-major-tom-starman.json
+│  │  ├─ read/
+│  │  │  ├─ owners/
+│  │  │  │  ├─ ziggy-stardust/
+│  │  │  │  ├─ major-tom/
+│  │  │  │  │  ├─ environments/
+│  │  │  │  │  │  ├─ development/
+│  │  │  │  │  │  ├─ production/
+│  │  │  │  │  │  │  ├─ org-perm-major-tom-production.json
+│  │  │  │  │  ├─ repositories/
+│  │  │  │  │  │  ├─ starman/
+│  │  │  │  │  │  │  ├─ org-perm-major-tom-starman.json
 │  ├─ custom_roles/
 ├─ repositories/
 │  ├─ codespace-oddity/

@@ -17,8 +17,6 @@ import (
 	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-github/v53/github"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 type EntitlementConfig struct {
@@ -101,28 +99,15 @@ func (config *EntitlementConfig) load(appTransport *ghinstallation.AppsTransport
 /*
  * Strip all the permissions but the one matching the one defined by the folder name .e.g. organization/<permissionName>
  */
-func (config *EntitlementConfig) stripAllPermissionsBut(permissionName string, entitlement *Entitlement) {
-	// Need to turn the JSON field name into the object property name, e.g. organization_administration into OrganizationAdministration
-	permissionNameTokens := strings.Split(permissionName, "_")
-	objectPropertyName := ""
-	for _, token := range permissionNameTokens {
-		// Capitalize the first letter of the token
-		objectPropertyName += cases.Title(language.English).String(token)
+func (config *EntitlementConfig) stripAllPermissionsBut(permissionName string, permission string, entitlement *Entitlement) {
+	jsonString := fmt.Sprintf(`{"%s": "%s"}`, permissionName, permission)
+	permissionObj := github.InstallationPermissions{}
+
+	err := json.Unmarshal([]byte(jsonString), &permissionObj)
+	if err != nil {
+		log.Printf("failed to create permission %s", jsonString)
 	}
-
-	// Get all the fields of the Permissions struct
-	fields := reflect.VisibleFields(reflect.TypeOf(struct{ github.InstallationPermissions }{}))
-	// Get all the permissions set in the entitlement
-	reflectScope := reflect.ValueOf(&entitlement.Scopes.Permissions).Elem()
-
-	for _, field := range fields {
-		value := reflectScope.FieldByName(field.Name)
-
-		// Has this filed been set? If it's not the one we want to keep, set it to zero
-		if value.IsValid() && !value.IsZero() && field.Name != objectPropertyName {
-			value.Set(reflect.Zero(value.Type()))
-		}
-	}
+	entitlement.Scopes.Permissions = permissionObj
 }
 
 /*
@@ -155,7 +140,7 @@ func (config *EntitlementConfig) loadFolder(path string, files []fs.DirEntry, is
 	// Regex to find the section right after /owners/ in the path
 	envRegex := regexp.MustCompile(`.*\/environments\/([^\/]+)\/`)
 	// Regex to find the section right after /organization/ in the path
-	orgRegex := regexp.MustCompile(`.*\/organization\/([^\/]+)\/`)
+	orgRegex := regexp.MustCompile(`.*\/organization\/([^\/]+)\/(read|admin|write)\/`)
 
 	skipFiles := false
 	// the directories below are not supposed to contain entitlement files
@@ -214,7 +199,10 @@ func (config *EntitlementConfig) loadFolder(path string, files []fs.DirEntry, is
 			orgPermissionName := orgRegex.FindStringSubmatch(fullPath)
 			if orgPermissionName != nil {
 				// we are under the orgnization/<permission> folder, so we can use the folder name as the unique permission name
-				config.stripAllPermissionsBut(fmt.Sprintf("organization_%s", orgPermissionName[1]), &entitlement)
+				config.stripAllPermissionsBut(fmt.Sprintf("organization_%s", orgPermissionName[1]), orgPermissionName[2], &entitlement)
+				// Whatever repo access needs to be removed
+				entitlement.Scopes.Repositories = nil
+
 			} else if !isRoot {
 				// We are not under the orgnization/<permission> folder and not at the root, so we need to strip all organization permissions
 				config.stripAllOrgPermissions(&entitlement)
