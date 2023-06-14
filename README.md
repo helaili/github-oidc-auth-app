@@ -3,7 +3,7 @@
 
 # github-oidc-auth-app
 
-A GitHub App that generates a GitHub API scoped token from within an Actions workflow based on OIDC claims
+A GitHub App that generates a GitHub API scoped token from within an Actions workflow based on OIDC claims. No more PAT! 
 
 # Overview
 Oftentimes you need a GitHub Actions pipeline to use the GitHub API to perform some operations on another repository or organization. For example, you may want to get a container, or you may want to create a repository in a different organization. In those cases, you need to use a GitHub API token that has the right scopes. The problem is that you cannot use the automatically provided GITHUB_TOKEN as it doesn't have enough permissions, and you don't want to use a personal access token because eithe. Those are tied to a specific humand user or to a machine account, and in both case it means generating, sharing, storing, renewing... a secret.
