@@ -240,7 +240,15 @@ Sample file content:
 }
 ```
 
-Sample file content for organization permission, e.g: `/organization/administration/entitlement.json`. `organization_administration` will be the only permission set, any other permission will be ignored. 
+Sample file content for organization permission, e.g: `/organization/administration/read/entitlement.json`. `organization_administration` will be the only permission set, any other permission will be ignored. 
+
+```json
+{
+    "workflow": "My first worlflow"
+}
+```
+
+The previous would be equivalent to the following `/entitlement.json` file:
 
 ```json
 {
