@@ -80,7 +80,7 @@ jobs:
     - name: Create container app
       id: create_container_app
       run: |
-        shortsha=$(echo ${${{ github.sha }}:0:7})
+        shortsha=$(echo ${{ github.sha }} | cut -c1-7)
         fqdn=$(az containerapp create -n oidc-auth-app-${{ inputs.environment }} --revision-suffix $shortsha -g ${{ vars.RESSOURCE_GROUP }} \
             --image ghcr.io/${{ github.repository }}:${{ inputs.tag }} --environment oidc-auth-${{ inputs.environment }}-env \
             --ingress external --target-port 9090 \
