@@ -11,13 +11,11 @@ import (
 type Scope struct {
 	Repositories []string                       `json:"repositories,omitempty"`
 	Permissions  github.InstallationPermissions `json:"permissions,omitempty"`
-	SourceFiles  []string
 }
 
 func NewScope() *Scope {
 	return &Scope{
 		Repositories: []string{},
-		SourceFiles:  []string{},
 		Permissions:  github.InstallationPermissions{},
 	}
 }

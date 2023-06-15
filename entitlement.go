@@ -29,7 +29,6 @@ type Entitlement struct {
 	WorkflowRef       string `json:"workflow_ref,omitempty"`
 	WorkflowSha       string `json:"workflow_sha,omitempty"`
 	Scopes            Scope  `json:"scopes"`
-	SourceFile        string
 }
 
 func (e Entitlement) regexString() string {
