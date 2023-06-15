@@ -80,7 +80,7 @@ jobs:
     - name: Create container app
       id: create_container_app
       run: |
-        fqdn=$(az containerapp create -n oidc-auth-app-${{ inputs.environment }} -g ${{ vars.RESSOURCE_GROUP }} \
+        fqdn=$(az containerapp create -n oidc-auth-app-${{ inputs.environment }}-rev${${{ github.sha }}:0:7} -g ${{ vars.RESSOURCE_GROUP }} \
             --image ghcr.io/${{ github.repository }}:${{ inputs.tag }} --environment oidc-auth-${{ inputs.environment }}-env \
             --ingress external --target-port 9090 \
             --registry-server gcr.io --registry-username ${{ github.repository_owner }} --registry-password dummy \
