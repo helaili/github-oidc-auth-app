@@ -239,11 +239,6 @@ func (config *EntitlementConfig) computeScopes(claims jwt.MapClaims) *Scope {
 		match, _ := regexp.MatchString(entitlement.regexString(), strMapClaims)
 		if match {
 			scope.merge(entitlement.Scopes)
-			if config.File == "" {
-				// This is a repo based config
-				entitlementStr, _ := json.Marshal(config.Entitlements)
-				log.Printf("Found match with %s\n", entitlementStr)
-			}
 		}
 	}
 	return scope
