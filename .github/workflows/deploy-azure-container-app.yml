@@ -123,5 +123,3 @@ jobs:
             -d '{"name":"ENDPOINT","value":"${{ steps.create_container_app.outputs.endpoint }}"}'
         fi
         
-
-  
