@@ -114,7 +114,7 @@ cat private-key.pem | base64
 
 This is the prefered option as it allows to create more advanced approval workflows based on `CODEOWNERS` files.
 
-Within a dedicated repo (defaults to `oidc_entitlements`, otherwise set the `CONFIG_REPO` environment variable accordingly), each JSON file defines a single entitlement, and the folder hierarchy implies a semantic that constrains the content. This means that the folder name will override the eventual matching setting in the file. For example, let's take a file `permission.json` in the `repositories/codespace-oddity/environments/production/owners/major-tom/repositories/starman` folder:
+Within a dedicated repo (defaults to `oidc_entitlements`, otherwise set the `CONFIG_REPO` environment variable accordingly), each JSON file defines a single entitlement, and the folder hierarchy implies a semantic that constrains the content. This means that the folder name will override the eventual matching setting in the file. For example, let's take a file `permission.json` in the `repositories/codespace-oddity/environment/production/owner/major-tom/repository/starman` folder:
 
 ```json
 {
@@ -150,18 +150,19 @@ This configuration will grant `write` access to the `codespace-oddity` repositor
 
 
 #### Semantic
-- `owners`: each subfolder defines the name of an organization or a user owning a worflow that can request a scoped token.
-- `repositories` when following an `owners` defininition (i.e. `.../owners/major-tom/repositories/starman`): each subfolder defines the name of a repository (within the organization or user) owning a worflow that can request a scoped token.
-- `repositories` when not following an `owners` definition: each subfolder defines the name of the repository within the organization where the app is installed which will be accessible with the scoped token. The app needs to have access to the repository in order to be able to create a scoped token for it.
-- `environments`: each subfolder defines the name of an environment (e.g. `development`, `production`, `staging`, etc.) targeted by the job requesting the scoped token.
+- `owner`: each subfolder defines the name of an organization or a user owning a worflow that can request a scoped token.
+- `repository` when following an `owner` defininition (i.e. `.../owner/major-tom/repository/starman`): each subfolder defines the name of a repository (within the organization or user) owning a worflow that can request a scoped token.
+- `repositories`: each subfolder defines the name of the repository within the organization where the app is installed which will be accessible with the scoped token. The app needs to have access to the repository in order to be able to create a scoped token for it.
+- `environment`: each subfolder defines the name of an environment (e.g. `development`, `production`, `staging`, etc.) targeted by the job requesting the scoped token.
 - `organization`: each subfolder defines the name of an organization level permission that will be granted to the scoped token. The name of the folder will be used to build the name of the permission. For example, if the folder is named `administration`, the permission will be `organization_administration`. The subfolder will provide the value of the permission, so it should be one of these values: `read`, `write`, `admin`.  See the the `properties of permissions` section [here](https://docs.github.com/en/enterprise-cloud@latest/rest/apps/apps?apiVersion=2022-11-28#create-a-scoped-access-token) to see the list of permissions and their values. 
 
 Notes: 
 - A file at the root of the repo can defined any permissions for any claim. 
 - only files under an `organizations` folder can defined an organization level permission.
 - files under an `organizations` folder can not povide permissions to a repository.
-- files directly under folders `organizations`, `repositories`, `environments` or `owners` are ignored.
-- semantic folders can be nested in any order (except for `owners` and `repositories` which need to be in that order when defining the source repository).
+- files under a `repositories` folder can not povide permissions to an organization.
+- files directly under folders `organization`, `repositories`, `repository`, `environment` or `owner` are ignored.
+- semantic folders can be nested in any order (except for `owner` and `repository` which need to be in that order when defining the source repository).
 
 Sample folder hierarchy:
 
@@ -170,27 +171,27 @@ repo/
 ├─ organization/
 │  ├─ administration/
 │  │  ├─ read/
-│  │  │  ├─ owners/
+│  │  │  ├─ owner/
 │  │  │  │  ├─ ziggy-stardust/
 │  │  │  │  ├─ major-tom/
-│  │  │  │  │  ├─ environments/
+│  │  │  │  │  ├─ environment/
 │  │  │  │  │  │  ├─ development/
 │  │  │  │  │  │  ├─ production/
 │  │  │  │  │  │  │  ├─ org-perm-major-tom-production.json
-│  │  │  │  │  ├─ repositories/
+│  │  │  │  │  ├─ repository/
 │  │  │  │  │  │  ├─ starman/
 │  │  │  │  │  │  │  ├─ org-perm-major-tom-starman.json
 │  ├─ custom_roles/
 ├─ repositories/
 │  ├─ codespace-oddity/
-│  │  ├─ owners/
+│  │  ├─ owner/
 │  │  │  ├─ ziggy-stardust/
 │  │  │  ├─ major-tom/
-│  │  │  │  ├─ environments/
+│  │  │  │  ├─ environment/
 │  │  │  │  │  ├─ development/
 │  │  │  │  │  ├─ production/
 │  │  │  │  │  │  ├─ repo-perm-major-tom-production.json
-│  │  │  │  ├─ repositories/
+│  │  │  │  ├─ repository/
 │  │  │  │  │  ├─ starman/
 │  │  │  │  │  │  ├─ repo-perm-major-tom-starman-1.json
 │  │  │  │  │  │  ├─ repo-perm-major-tom-starman-2.json
@@ -248,7 +249,7 @@ Sample file content for organization permission, e.g: `/organization/administrat
 }
 ```
 
-The previous would be equivalent to the following `/entitlement.json` file:
+The previous would be equivalent to the following `/entitlement.json` file at the root of the repo:
 
 ```json
 {
