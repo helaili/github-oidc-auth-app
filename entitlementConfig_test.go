@@ -175,7 +175,7 @@ func TestGoodRepoConfig(t *testing.T) {
 				},
 			},
 		},
-		// from test/good-repo/organization/administration/owners/major-tom/environments/development/admin_read.json
+		// from test/good-repo/organization/administration/owner/major-tom/environment/development/admin_read.json
 		{
 			RepositoryOwner: "major-tom",
 			Environment:     "development",
@@ -187,7 +187,7 @@ func TestGoodRepoConfig(t *testing.T) {
 				},
 			},
 		},
-		// from test/good-repo/repositories/codespace-oddity/owners/major-tom/test-repo-dev.json
+		// from test/good-repo/repositories/codespace-oddity/owner/major-tom/test-repo-dev.json
 		{
 			Repository:      "major-tom/test-two-repo",
 			RepositoryOwner: "major-tom",
@@ -201,7 +201,7 @@ func TestGoodRepoConfig(t *testing.T) {
 				},
 			},
 		},
-		// from test/good-repo/repositories/codespace-oddity/owners/major-tom/environments/development/test-workflow.json
+		// from test/good-repo/repositories/codespace-oddity/owner/major-tom/environment/development/test-workflow.json
 		{
 			RepositoryOwner: "major-tom",
 			Environment:     "development",
@@ -215,7 +215,7 @@ func TestGoodRepoConfig(t *testing.T) {
 				},
 			},
 		},
-		// from test/good-repo/repositories/codespace-oddity/owners/major-tom/repositories/starman/entitlements.json
+		// from test/good-repo/repositories/codespace-oddity/owner/major-tom/repository/starman/entitlements.json
 		{
 			Repository:      "major-tom/starman",
 			RepositoryOwner: "major-tom",
@@ -271,7 +271,7 @@ func TestDeepEnvRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/deep-env-repo/repositories/codespace-oddity/owners/major-tom/repositories/starman/environments/production/test-workflow.json
+		// from test/deep-env-repo/repositories/codespace-oddity/owner/major-tom/repository/starman/environment/production/test-workflow.json
 		{
 			Repository:      "major-tom/starman",
 			RepositoryOwner: "major-tom",
@@ -314,7 +314,7 @@ func TestDeepRepoRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/deep-repo-repo/repositories/codespace-oddity/environments/production/owners/major-tom/repositories/starman/test-workflow.json
+		// from test/deep-repo-repo/repositories/codespace-oddity/environment/production/owner/major-tom/repository/starman/test-workflow.json
 		{
 			Repository:      "major-tom/starman",
 			RepositoryOwner: "major-tom",
@@ -357,7 +357,7 @@ func TestOwnerEnvRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/owner-env-repo/owners/major-tom/environments/production/test-workflow.json
+		// from test/owner-env-repo/owner/major-tom/environment/production/test-workflow.json
 		{
 			RepositoryOwner: "major-tom",
 			Environment:     "production",
@@ -399,7 +399,7 @@ func TestRepoRepoRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/repo-repo-repo/repositories/codespace-oddity/repositories/starman/test-workflow.json
+		// from test/repo-repo-repo/repositories/codespace-oddity/repository/starman/test-workflow.json
 		{
 			BasicEntitlement: BasicEntitlement{
 				Workflow: "Workflow 1",
@@ -439,7 +439,7 @@ func TestEnvRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/env-repo/environments/production/test-workflow.json
+		// from test/env-repo/environment/production/test-workflow.json
 		{
 			Environment: "production",
 			BasicEntitlement: BasicEntitlement{
@@ -477,7 +477,7 @@ func TestEnvRepoRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/env-repo-repo/environments/production/repositories/codespace-oddity/test-workflow.json
+		// from test/env-repo-repo/environment/production/repositories/codespace-oddity/test-workflow.json
 		{
 			Environment: "production",
 			BasicEntitlement: BasicEntitlement{
@@ -502,7 +502,7 @@ func TestEnvRepoRepoConfig(t *testing.T) {
 }
 
 func TestEnvOwnersRepoConfig(t *testing.T) {
-	path := "test/env-owners-repo-repo"
+	path := "test/env-owner-repo-repo"
 
 	config := NewEntitlementConfig("test", 1, "https://github.com", "test", "")
 
@@ -518,7 +518,7 @@ func TestEnvOwnersRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/env-owners-repo-repo/environments/production/owners/major-tom/repositories/starman/test-workflow.json
+		// from test/env-owner-repo-repo/environment/production/owner/major-tom/repository/starman/test-workflow.json
 		{
 			Repository:      "major-tom/starman",
 			RepositoryOwner: "major-tom",
@@ -558,7 +558,7 @@ func TestEnvOrganizationRepoConfig(t *testing.T) {
 	write := "write"
 
 	expectedEntitlements := []Entitlement{
-		// from test/env-organization-repo/environments/production/organization/custom_roles/test-workflow.json
+		// from test/env-organization-repo/environment/production/organization/custom_roles/test-workflow.json
 		{
 			Environment: "production",
 			BasicEntitlement: BasicEntitlement{

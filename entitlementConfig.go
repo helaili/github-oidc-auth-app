@@ -131,20 +131,19 @@ func (config *EntitlementConfig) stripAllOrgPermissions(entitlement *Entitlement
 
 func (config *EntitlementConfig) loadFolder(path string, files []fs.DirEntry, isRoot bool) error {
 	// Regex to find the section right after /repositories/ in the path
-	// targetRepoRegex := regexp.MustCompile(`.*\/repositories\/([^\/]+)\/`)
 	targetRepoRegex := regexp.MustCompile(`\/repositories\/([^\/]+)\/`)
-	// Regex to find the section right after /owners/ in the path
-	ownerRegex := regexp.MustCompile(`.*\/owners\/([^\/]+)\/`)
-	// Regex to find the section right after /owners/xxxx/repositories in the path
-	sourceRepoRegex := regexp.MustCompile(`\/owners\/[^\/]+\/repositories\/([^\/]+)\/`)
-	// Regex to find the section right after /owners/ in the path
-	envRegex := regexp.MustCompile(`.*\/environments\/([^\/]+)\/`)
+	// Regex to find the section right after /owner/ in the path
+	ownerRegex := regexp.MustCompile(`.*\/owner\/([^\/]+)\/`)
+	// Regex to find the section right after /owner/xxxx/repository in the path
+	sourceRepoRegex := regexp.MustCompile(`\/owner\/[^\/]+\/repository\/([^\/]+)\/`)
+	// Regex to find the section right after /owner/ in the path
+	envRegex := regexp.MustCompile(`.*\/environment\/([^\/]+)\/`)
 	// Regex to find the section right after /organization/ in the path
 	orgRegex := regexp.MustCompile(`.*\/organization\/([^\/]+)\/(read|admin|write)\/`)
 
 	skipFiles := false
 	// the directories below are not supposed to contain entitlement files
-	if strings.HasSuffix(path, "/repositories") || strings.HasSuffix(path, "/environments") || strings.HasSuffix(path, "/owners") {
+	if strings.HasSuffix(path, "/repositories") || strings.HasSuffix(path, "/environment") || strings.HasSuffix(path, "/owner") || strings.HasSuffix(path, "/organization") || strings.HasSuffix(path, "/repository/") {
 		skipFiles = true
 	}
 
@@ -181,9 +180,7 @@ func (config *EntitlementConfig) loadFolder(path string, files []fs.DirEntry, is
 				entitlement.Repository = fmt.Sprintf("%s/%s", entitlement.RepositoryOwner, sourceRepoName[1])
 			}
 
-			// Removing the /owners/xxxx/repositories/yyyyy part of the path so that we can fing the target repository name
-			modifiedFullPath := sourceRepoRegex.ReplaceAllString(fullPath, "/")
-			repoName := targetRepoRegex.FindStringSubmatch(modifiedFullPath)
+			repoName := targetRepoRegex.FindStringSubmatch(fullPath)
 			if repoName != nil {
 				// A target repository name is present in the path, so we can use it as the repository name in the scope
 				// Any previously set list of repositories is discarded
