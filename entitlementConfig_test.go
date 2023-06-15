@@ -19,15 +19,13 @@ func TestStripAllPermissionsBut(t *testing.T) {
 		Repository:      "major-tom/starman",
 		RepositoryOwner: "major-tom",
 		Environment:     "development",
-		BasicEntitlement: BasicEntitlement{
-			Scopes: Scope{
-				Permissions: github.InstallationPermissions{
-					Contents:                   &write,
-					OrganizationAdministration: &read,
-					OrganizationCustomRoles:    &read,
-				},
-				Repositories: []string{"codespace-oddity"},
+		Scopes: Scope{
+			Permissions: github.InstallationPermissions{
+				Contents:                   &write,
+				OrganizationAdministration: &read,
+				OrganizationCustomRoles:    &read,
 			},
+			Repositories: []string{"codespace-oddity"},
 		},
 	}
 
@@ -35,13 +33,11 @@ func TestStripAllPermissionsBut(t *testing.T) {
 		Repository:      "major-tom/starman",
 		RepositoryOwner: "major-tom",
 		Environment:     "development",
-		BasicEntitlement: BasicEntitlement{
-			Scopes: Scope{
-				Permissions: github.InstallationPermissions{
-					OrganizationAdministration: &read,
-				},
-				Repositories: []string{"codespace-oddity"},
+		Scopes: Scope{
+			Permissions: github.InstallationPermissions{
+				OrganizationAdministration: &read,
 			},
+			Repositories: []string{"codespace-oddity"},
 		},
 	}
 
@@ -64,15 +60,13 @@ func TestStripAllOrgPermissions(t *testing.T) {
 		Repository:      "major-tom/starman",
 		RepositoryOwner: "major-tom",
 		Environment:     "development",
-		BasicEntitlement: BasicEntitlement{
-			Scopes: Scope{
-				Permissions: github.InstallationPermissions{
-					Contents:                   &write,
-					OrganizationAdministration: &read,
-					OrganizationCustomRoles:    &write,
-				},
-				Repositories: []string{"codespace-oddity"},
+		Scopes: Scope{
+			Permissions: github.InstallationPermissions{
+				Contents:                   &write,
+				OrganizationAdministration: &read,
+				OrganizationCustomRoles:    &write,
 			},
+			Repositories: []string{"codespace-oddity"},
 		},
 	}
 
@@ -80,13 +74,11 @@ func TestStripAllOrgPermissions(t *testing.T) {
 		Repository:      "major-tom/starman",
 		RepositoryOwner: "major-tom",
 		Environment:     "development",
-		BasicEntitlement: BasicEntitlement{
-			Scopes: Scope{
-				Permissions: github.InstallationPermissions{
-					Contents: &write,
-				},
-				Repositories: []string{"codespace-oddity"},
+		Scopes: Scope{
+			Permissions: github.InstallationPermissions{
+				Contents: &write,
 			},
+			Repositories: []string{"codespace-oddity"},
 		},
 	}
 
@@ -121,14 +113,12 @@ func TestSimpleRepoConfig(t *testing.T) {
 			Repository:      "major-tom/starman",
 			RepositoryOwner: "major-tom",
 			Environment:     "development",
-			BasicEntitlement: BasicEntitlement{
-				Scopes: Scope{
-					Permissions: github.InstallationPermissions{
-						Contents:                   &write,
-						OrganizationAdministration: &read,
-					},
-					Repositories: []string{"codespace-oddity"},
+			Scopes: Scope{
+				Permissions: github.InstallationPermissions{
+					Contents:                   &write,
+					OrganizationAdministration: &read,
 				},
+				Repositories: []string{"codespace-oddity"},
 			},
 		},
 	}
@@ -163,15 +153,13 @@ func TestGoodRepoConfig(t *testing.T) {
 			Repository:      "major-tom/test-three-repo",
 			RepositoryOwner: "major-tom",
 			Environment:     "development",
-			BasicEntitlement: BasicEntitlement{
-				Scopes: Scope{
-					Repositories: []string{
-						"codespace-oddity",
-					},
-					Permissions: github.InstallationPermissions{
-						OrganizationAdministration: &read,
-						Contents:                   &write,
-					},
+			Scopes: Scope{
+				Repositories: []string{
+					"codespace-oddity",
+				},
+				Permissions: github.InstallationPermissions{
+					OrganizationAdministration: &read,
+					Contents:                   &write,
 				},
 			},
 		},
@@ -179,11 +167,9 @@ func TestGoodRepoConfig(t *testing.T) {
 		{
 			RepositoryOwner: "major-tom",
 			Environment:     "development",
-			BasicEntitlement: BasicEntitlement{
-				Scopes: Scope{
-					Permissions: github.InstallationPermissions{
-						OrganizationAdministration: &read,
-					},
+			Scopes: Scope{
+				Permissions: github.InstallationPermissions{
+					OrganizationAdministration: &read,
 				},
 			},
 		},
@@ -192,27 +178,23 @@ func TestGoodRepoConfig(t *testing.T) {
 			Repository:      "major-tom/test-two-repo",
 			RepositoryOwner: "major-tom",
 			Environment:     "development",
-			BasicEntitlement: BasicEntitlement{
-				Scopes: Scope{
-					Permissions: github.InstallationPermissions{
-						Contents: &write,
-					},
-					Repositories: []string{"codespace-oddity"},
+			Scopes: Scope{
+				Permissions: github.InstallationPermissions{
+					Contents: &write,
 				},
+				Repositories: []string{"codespace-oddity"},
 			},
 		},
 		// from test/good-repo/repositories/codespace-oddity/owner/major-tom/environment/development/test-workflow.json
 		{
 			RepositoryOwner: "major-tom",
 			Environment:     "development",
-			BasicEntitlement: BasicEntitlement{
-				Workflow: "Workflow 1",
-				Scopes: Scope{
-					Permissions: github.InstallationPermissions{
-						Contents: &write,
-					},
-					Repositories: []string{"codespace-oddity"},
+			Workflow:        "Workflow 1",
+			Scopes: Scope{
+				Permissions: github.InstallationPermissions{
+					Contents: &write,
 				},
+				Repositories: []string{"codespace-oddity"},
 			},
 		},
 		// from test/good-repo/repositories/codespace-oddity/owner/major-tom/repository/starman/entitlements.json
@@ -220,13 +202,11 @@ func TestGoodRepoConfig(t *testing.T) {
 			Repository:      "major-tom/starman",
 			RepositoryOwner: "major-tom",
 			Environment:     "development",
-			BasicEntitlement: BasicEntitlement{
-				Scopes: Scope{
-					Permissions: github.InstallationPermissions{
-						Contents: &write,
-					},
-					Repositories: []string{"codespace-oddity"},
+			Scopes: Scope{
+				Permissions: github.InstallationPermissions{
+					Contents: &write,
 				},
+				Repositories: []string{"codespace-oddity"},
 			},
 		},
 		// test/good-repo/repositories/codespace-oddity/codespace-oddity-generic.json
@@ -234,14 +214,12 @@ func TestGoodRepoConfig(t *testing.T) {
 			Repository:      "major-tom/test-repo",
 			RepositoryOwner: "major-tom",
 			Environment:     "development",
-			BasicEntitlement: BasicEntitlement{
-				Scopes: Scope{
-					Permissions: github.InstallationPermissions{
-						Contents: &write,
-					},
-					Repositories: []string{
-						"codespace-oddity",
-					},
+			Scopes: Scope{
+				Permissions: github.InstallationPermissions{
+					Contents: &write,
+				},
+				Repositories: []string{
+					"codespace-oddity",
 				},
 			},
 		},
@@ -276,15 +254,13 @@ func TestDeepEnvRepoConfig(t *testing.T) {
 			Repository:      "major-tom/starman",
 			RepositoryOwner: "major-tom",
 			Environment:     "production",
-			BasicEntitlement: BasicEntitlement{
-				Workflow: "Workflow 1",
-				Scopes: Scope{
-					Repositories: []string{
-						"codespace-oddity",
-					},
-					Permissions: github.InstallationPermissions{
-						Contents: &write,
-					},
+			Workflow:        "Workflow 1",
+			Scopes: Scope{
+				Repositories: []string{
+					"codespace-oddity",
+				},
+				Permissions: github.InstallationPermissions{
+					Contents: &write,
 				},
 			},
 		},
@@ -319,15 +295,13 @@ func TestDeepRepoRepoConfig(t *testing.T) {
 			Repository:      "major-tom/starman",
 			RepositoryOwner: "major-tom",
 			Environment:     "production",
-			BasicEntitlement: BasicEntitlement{
-				Workflow: "Workflow 1",
-				Scopes: Scope{
-					Repositories: []string{
-						"codespace-oddity",
-					},
-					Permissions: github.InstallationPermissions{
-						Contents: &write,
-					},
+			Workflow:        "Workflow 1",
+			Scopes: Scope{
+				Repositories: []string{
+					"codespace-oddity",
+				},
+				Permissions: github.InstallationPermissions{
+					Contents: &write,
 				},
 			},
 		},
@@ -361,12 +335,10 @@ func TestOwnerEnvRepoConfig(t *testing.T) {
 		{
 			RepositoryOwner: "major-tom",
 			Environment:     "production",
-			BasicEntitlement: BasicEntitlement{
-				Workflow: "Workflow 1",
-				Scopes: Scope{
-					Permissions: github.InstallationPermissions{
-						Contents: &write,
-					},
+			Workflow:        "Workflow 1",
+			Scopes: Scope{
+				Permissions: github.InstallationPermissions{
+					Contents: &write,
 				},
 			},
 		},
@@ -401,15 +373,13 @@ func TestRepoRepoRepoConfig(t *testing.T) {
 	expectedEntitlements := []Entitlement{
 		// from test/repo-repo-repo/repositories/codespace-oddity/repository/starman/test-workflow.json
 		{
-			BasicEntitlement: BasicEntitlement{
-				Workflow: "Workflow 1",
-				Scopes: Scope{
-					Repositories: []string{
-						"codespace-oddity",
-					},
-					Permissions: github.InstallationPermissions{
-						Contents: &write,
-					},
+			Workflow: "Workflow 1",
+			Scopes: Scope{
+				Repositories: []string{
+					"codespace-oddity",
+				},
+				Permissions: github.InstallationPermissions{
+					Contents: &write,
 				},
 			},
 		},
@@ -442,12 +412,10 @@ func TestEnvRepoConfig(t *testing.T) {
 		// from test/env-repo/environment/production/test-workflow.json
 		{
 			Environment: "production",
-			BasicEntitlement: BasicEntitlement{
-				Workflow: "Workflow 1",
-				Scopes: Scope{
-					Permissions: github.InstallationPermissions{
-						Contents: &write,
-					},
+			Workflow:    "Workflow 1",
+			Scopes: Scope{
+				Permissions: github.InstallationPermissions{
+					Contents: &write,
 				},
 			},
 		},
@@ -480,15 +448,13 @@ func TestEnvRepoRepoConfig(t *testing.T) {
 		// from test/env-repo-repo/environment/production/repositories/codespace-oddity/test-workflow.json
 		{
 			Environment: "production",
-			BasicEntitlement: BasicEntitlement{
-				Workflow: "Workflow 1",
-				Scopes: Scope{
-					Repositories: []string{
-						"codespace-oddity",
-					},
-					Permissions: github.InstallationPermissions{
-						Contents: &write,
-					},
+			Workflow:    "Workflow 1",
+			Scopes: Scope{
+				Repositories: []string{
+					"codespace-oddity",
+				},
+				Permissions: github.InstallationPermissions{
+					Contents: &write,
 				},
 			},
 		},
@@ -523,12 +489,10 @@ func TestEnvOwnersRepoConfig(t *testing.T) {
 			Repository:      "major-tom/starman",
 			RepositoryOwner: "major-tom",
 			Environment:     "production",
-			BasicEntitlement: BasicEntitlement{
-				Workflow: "Workflow 1",
-				Scopes: Scope{
-					Permissions: github.InstallationPermissions{
-						Contents: &write,
-					},
+			Workflow:        "Workflow 1",
+			Scopes: Scope{
+				Permissions: github.InstallationPermissions{
+					Contents: &write,
 				},
 			},
 		},
@@ -561,12 +525,10 @@ func TestEnvOrganizationRepoConfig(t *testing.T) {
 		// from test/env-organization-repo/environment/production/organization/custom_roles/test-workflow.json
 		{
 			Environment: "production",
-			BasicEntitlement: BasicEntitlement{
-				Workflow: "Workflow 1",
-				Scopes: Scope{
-					Permissions: github.InstallationPermissions{
-						OrganizationCustomRoles: &write,
-					},
+			Workflow:    "Workflow 1",
+			Scopes: Scope{
+				Permissions: github.InstallationPermissions{
+					OrganizationCustomRoles: &write,
 				},
 			},
 		},

@@ -163,7 +163,7 @@ func (appContext *AppContext) handleTokenRequest(w http.ResponseWriter, req *htt
 	if scopedTokenResponse.ScopedToken == "" {
 		log.Printf("no token generated for claims: %v\n", claims)
 	} else {
-		log.Printf("succesfully generated token for claims: %v, with scopes %s\n", claims, scope.String())
+		log.Printf("succesfully generated token for claims: %v, with scopes %s from files %v\n", claims, scope.String(), scope.SourceFiles)
 	}
 
 	// Return the new token to the client

@@ -2,7 +2,12 @@ package main
 
 import "fmt"
 
-type BasicEntitlement struct {
+type Entitlement struct {
+	Environment       string `json:"environment,omitempty"`
+	Repository        string `json:"repository,omitempty"`
+	RepositoryId      int64  `json:"repository_id,omitempty"`
+	RepositoryOwner   string `json:"repository_owner,omitempty"`
+	RepositoryOwnerId int64  `json:"repository_owner_id,omitempty"`
 	Actor             string `json:"actor,omitempty"`
 	ActorId           int64  `json:"actor_id,omitempty"`
 	Audience          string `json:"aud,omitempty"`
@@ -24,15 +29,7 @@ type BasicEntitlement struct {
 	WorkflowRef       string `json:"workflow_ref,omitempty"`
 	WorkflowSha       string `json:"workflow_sha,omitempty"`
 	Scopes            Scope  `json:"scopes"`
-}
-
-type Entitlement struct {
-	BasicEntitlement
-	Environment       string `json:"environment,omitempty"`
-	Repository        string `json:"repository,omitempty"`
-	RepositoryId      int64  `json:"repository_id,omitempty"`
-	RepositoryOwner   string `json:"repository_owner,omitempty"`
-	RepositoryOwnerId int64  `json:"repository_owner_id,omitempty"`
+	SourceFile        string
 }
 
 func (e Entitlement) regexString() string {

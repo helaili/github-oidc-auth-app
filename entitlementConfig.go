@@ -205,6 +205,7 @@ func (config *EntitlementConfig) loadFolder(path string, files []fs.DirEntry, is
 				config.stripAllOrgPermissions(&entitlement)
 			}
 
+			entitlement.SourceFile = fullPath
 			config.Entitlements = append(config.Entitlements, entitlement)
 
 		} else if file.IsDir() && file.Name() != ".git" {
@@ -239,6 +240,10 @@ func (config *EntitlementConfig) computeScopes(claims jwt.MapClaims) *Scope {
 		match, _ := regexp.MatchString(entitlement.regexString(), strMapClaims)
 		if match {
 			scope.merge(entitlement.Scopes)
+			if config.File == "" {
+				// This is a repo based config
+				scope.SourceFiles = append(scope.SourceFiles, entitlement.SourceFile)
+			}
 		}
 	}
 	return scope
