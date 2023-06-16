@@ -132,8 +132,8 @@ It will be equivalent to the file below stored at the root of the repository.
 ```json
 {
   "repository":       "major-tom/starman",
-	"repository_owner": "major-tom",
-	"environment":      "production",
+  "repository_owner": "major-tom",
+  "environment":      "production",
   "workflow":         "Manual Test Workflow",
   "scopes": {
     "repositories": [
