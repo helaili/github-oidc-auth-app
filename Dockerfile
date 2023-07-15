@@ -28,10 +28,12 @@ FROM --platform=${BUILDPLATFORM:-linux/amd64} gcr.io/distroless/static:nonroot
 
 LABEL org.opencontainers.image.source=https://github.com/helaili/github-oidc-auth-app
 
+ENV PORT=8080
+
 WORKDIR /
 COPY --from=builder /usr/bin/github-oidc-auth-app /
 USER nonroot:nonroot
 
-EXPOSE $PORT
+EXPOSE ${PORT}
 
 CMD ["/github-oidc-auth-app"]
