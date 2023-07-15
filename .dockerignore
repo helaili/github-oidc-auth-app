@@ -3,5 +3,4 @@
 .github
 github-oidc-auth-app
 *.pem
-test
 *.bicep

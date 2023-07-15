@@ -13,12 +13,10 @@ clean:
 	rm -f github-oidc-auth-app
 
 test:
-	go test -v
+	go test -v ./...
 
 docker-build:
-	make build && docker build -t github-oidc-auth-app .
+	docker build -t github-oidc-auth-app .
 
 docker-run:
 	docker run -it --rm --name github-oidc-auth-app -p 8080:8080 --env-file=.env.docker github-oidc-auth-app
-
-

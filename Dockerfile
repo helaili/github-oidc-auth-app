@@ -1,14 +1,37 @@
-FROM golang:1.20.3
+FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.20.3 as builder
 
-WORKDIR /usr/src/app
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
 
-# pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
-COPY go.mod go.sum ./
-RUN go mod download && go mod verify
+ENV CGO_ENABLED=0
+ENV GO111MODULE=on
 
-COPY . .
-RUN go build -v -o /usr/local/bin/app ./...
+WORKDIR /go/src/github.com/helaili/github-oidc-auth-app
+
+# Cache the download before continuing
+COPY go.mod go.mod
+COPY go.sum go.sum
+RUN go mod download
+
+COPY .  .
+
+RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+  go test -v ./...
+
+RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+  go build -ldflags "-s -w" \
+  -a -installsuffix cgo -o /usr/bin/github-oidc-auth-app .
+
+FROM --platform=${BUILDPLATFORM:-linux/amd64} gcr.io/distroless/static:nonroot
+
+LABEL org.opencontainers.image.source=https://github.com/helaili/github-oidc-auth-app
+
+WORKDIR /
+COPY --from=builder /usr/bin/github-oidc-auth-app /
+USER nonroot:nonroot
 
 EXPOSE $PORT
 
-CMD ["app"]
+CMD ["/github-oidc-auth-app"]
