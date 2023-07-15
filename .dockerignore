@@ -4,3 +4,4 @@
 github-oidc-auth-app
 *.pem
 *.bicep
+fly.toml
