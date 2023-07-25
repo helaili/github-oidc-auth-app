@@ -25,7 +25,7 @@ RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
   -buildvcs=false \
   -a -installsuffix cgo -o /usr/bin/github-oidc-auth-app .
 
-FROM --platform=${BUILDPLATFORM:-linux/amd64} gcr.io/distroless/static:nonroot
+FROM --platform=${TARGETPLATFORM:-linux/amd64} gcr.io/distroless/static:nonroot
 
 LABEL org.opencontainers.image.source=https://github.com/helaili/github-oidc-auth-app
 
