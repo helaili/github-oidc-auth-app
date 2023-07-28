@@ -9,3 +9,4 @@ bin
 .vscode
 claims.txt
 credential.json
+fly.toml
